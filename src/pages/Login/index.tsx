@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import useTextContext from "../../contexts/Text";
 import { apply } from "../../utils/css";
+import { getLoginToken } from "../../services/login";
 
 function TextInput(
     {
@@ -31,11 +32,11 @@ function TextInput(
                   onChange={(e)=>setValue(e.currentTarget.value)}
                   disabled={disabled}
               />
-            <p
+            {/* <p
                 className={`${apply(error, 'visible', 'invisible')} text-rose-500`}
             >
                 {error}
-            </p>
+            </p> */}
         </div>
     );
 }
@@ -46,9 +47,26 @@ function LoginForm(
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-    function onSubmit(e: FormEvent) {
+    const [disabled, setDisabled] = useState(false);
+    async function onSubmit(e: FormEvent) {
+        setDisabled(true);
         e.preventDefault();
         console.log(name, password);
+        try{
+            setError('');
+            const token = await getLoginToken(name, password);
+            console.log(token);
+        }catch(err){
+            let error = text('ERROR_GENERIC');
+            if(err instanceof Error){
+                if(err.message === 'AUTH_FAILED') {
+                    error = text('LOGIN_ERROR_BAD_CREDS');
+                }
+            }
+            setError(error);
+        } finally {
+            setDisabled(false);
+        }
     }
     return (
         <form onSubmit={onSubmit} className="w-96 border-2 px-8 py-8 rounded grid grid-rows-1 gap-y-4 bg-neutral-50 shadow-lg">
@@ -57,17 +75,21 @@ function LoginForm(
                 type={'text'}
                 value={name}
                 setValue={setName}
+                error={error}
+                disabled={disabled}
             />
             <TextInput 
                 label={text('LOGIN_PASSWORD')}
                 type="password"
                 value={password}
                 setValue={setPassword}
+                error={error}
+                disabled={disabled}
             />
             <p className={`bg-rose-400 text-white rounded-2xl p-2 ${apply(error, 'visible', 'invisible')}`}>
                 {error ?? " "}
             </p>
-            <button type="submit" className="px-4 py-4 font-semibold text-sm bg-sky-500 hover:bg-sky-600 text-white rounded-md shadow-sm opacity-100 w-8/12 mx-auto disabled:bg-sky-200">
+            <button disabled={disabled} type="submit" className="px-4 py-4 font-semibold text-sm bg-sky-500 hover:bg-sky-600 text-white rounded-md shadow-sm opacity-100 w-8/12 mx-auto disabled:bg-sky-200">
                 {text('LOGIN_ACTION')}
             </button>
         </form>

@@ -3,6 +3,8 @@ import React, { createContext, useContext, useMemo } from "react"
 type TextCode = 'LOGIN_USERNAME' 
                 | 'LOGIN_PASSWORD'
                 | 'LOGIN_ACTION'
+                | 'ERROR_GENERIC'
+                | 'LOGIN_ERROR_BAD_CREDS'
 
 
 interface ITextContext {
