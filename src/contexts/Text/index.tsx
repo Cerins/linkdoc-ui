@@ -76,6 +76,6 @@ export {
 }
 
 export type {
-    TextCode, ITextContext
+    TextCode, ITextContext, Locale
 }
 
