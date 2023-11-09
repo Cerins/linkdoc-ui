@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import useTextContext from "../../contexts/Text";
+import useTextContext, { TextCode } from "../../contexts/Text";
 import { apply } from "../../utils/css";
 import { getLoginToken } from "../../services/login";
 
@@ -46,21 +46,21 @@ function LoginForm(
     const { text } = useTextContext();
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
+    const [error, setError] = useState<TextCode | null>(null);
     const [disabled, setDisabled] = useState(false);
     async function onSubmit(e: FormEvent) {
         setDisabled(true);
         e.preventDefault();
         console.log(name, password);
         try{
-            setError('');
+            setError(null);
             const token = await getLoginToken(name, password);
             console.log(token);
         }catch(err){
-            let error = text('ERROR_GENERIC');
+            let error: TextCode = 'ERROR_GENERIC';
             if(err instanceof Error){
                 if(err.message === 'AUTH_FAILED') {
-                    error = text('LOGIN_ERROR_BAD_CREDS');
+                    error = 'LOGIN_ERROR_BAD_CREDS';
                 }
             }
             setError(error);
@@ -75,7 +75,7 @@ function LoginForm(
                 type={'text'}
                 value={name}
                 setValue={setName}
-                error={error}
+                error={error || ""}
                 disabled={disabled}
             />
             <TextInput 
@@ -83,11 +83,11 @@ function LoginForm(
                 type="password"
                 value={password}
                 setValue={setPassword}
-                error={error}
+                error={error || ""}
                 disabled={disabled}
             />
             <p className={`bg-rose-400 text-white rounded-2xl p-2 ${apply(error, 'visible', 'invisible')}`}>
-                {error ?? " "}
+                {error ? text(error) : " "}
             </p>
             <button disabled={disabled} type="submit" className="px-4 py-4 font-semibold text-sm bg-sky-500 hover:bg-sky-600 text-white rounded-md shadow-sm opacity-100 w-8/12 mx-auto disabled:bg-sky-200">
                 {text('LOGIN_ACTION')}
