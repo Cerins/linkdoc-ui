@@ -3,8 +3,10 @@ import React, { createContext, useContext, useMemo, useState } from "react"
 type TextCode = 'LOGIN_USERNAME' 
                 | 'LOGIN_PASSWORD'
                 | 'LOGIN_ACTION'
-                | 'ERROR_GENERIC'
                 | 'LOGIN_ERROR_BAD_CREDS'
+                | 'ERROR_GENERIC'
+                | 'LANDING_STATUS'
+                | 'LANDING_DISCONNECTED'
 
 type Locale = 'lv' | 'en'
 
@@ -37,14 +39,19 @@ const dictionary: Record<Locale, Record<TextCode, string>> = {
         'LOGIN_PASSWORD': 'Parole',
         'LOGIN_ACTION': 'Pieslēgties',
         'ERROR_GENERIC': 'Notika neparedzēta kļūda',
-        'LOGIN_ERROR_BAD_CREDS': 'Nepareizs lietotājvārds vai parole'
+        'LOGIN_ERROR_BAD_CREDS': 'Nepareizs lietotājvārds vai parole',
+        'LANDING_DISCONNECTED': 'Nav pieslēguma. Pieslēgties ir iespējams: ',
+        'LANDING_STATUS': 'Šobridējais stāvoklis ir '
+
     },
     'en': {
         'LOGIN_USERNAME': 'Username',
         'LOGIN_PASSWORD': 'Password',
         'LOGIN_ACTION': 'Login',
         'ERROR_GENERIC': 'Unknkown error happened',
-        'LOGIN_ERROR_BAD_CREDS': 'Invalid username or password'
+        'LOGIN_ERROR_BAD_CREDS': 'Invalid username or password',
+        'LANDING_DISCONNECTED': 'Not connect. It is possible to connect through',
+        'LANDING_STATUS': 'The current connection state is '
     }
 
 }

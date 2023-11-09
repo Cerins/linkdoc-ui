@@ -1,7 +1,10 @@
-import { FormEvent, useState } from "react";
-import useTextContext, { TextCode } from "../../contexts/Text";
+import { FormEvent, useEffect, useState } from "react";
+import useTextService, { TextCode } from "../../contexts/Text";
 import { apply } from "../../utils/css";
 import { getLoginToken } from "../../services/login";
+import useSocket, { SocketStatus } from "../../contexts/Socket";
+import config from "../../services/config";
+import { useNavigate } from "react-router-dom";
 
 function TextInput(
     {
@@ -43,11 +46,28 @@ function TextInput(
 
 function LoginForm(
 ) {
-    const { text } = useTextContext();
+    const { text } = useTextService();
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<TextCode | null>(null);
     const [disabled, setDisabled] = useState(false);
+    const { connect, status } = useSocket();
+    const navigate = useNavigate()
+    useEffect(()=>{
+        if(
+            disabled &&
+            (status === SocketStatus.ERROR)
+        ) {
+            setError('ERROR_GENERIC')
+            setDisabled(false);
+        }
+        console.log('Oh a status', status)
+    }, [disabled, status])
+    useEffect(()=>{
+        if(status === SocketStatus.CONNECTED) {
+            navigate('/')
+        }
+    }, [status, navigate])
     async function onSubmit(e: FormEvent) {
         setDisabled(true);
         e.preventDefault();
@@ -55,7 +75,7 @@ function LoginForm(
         try{
             setError(null);
             const token = await getLoginToken(name, password);
-            console.log(token);
+            connect(`${config.socketURL}?token=${token}`)
         }catch(err){
             let error: TextCode = 'ERROR_GENERIC';
             if(err instanceof Error){
@@ -63,9 +83,11 @@ function LoginForm(
                     error = 'LOGIN_ERROR_BAD_CREDS';
                 }
             }
+            console.log(err)
             setError(error);
-        } finally {
             setDisabled(false);
+        } finally {
+            // setDisabled(false);
         }
     }
     return (

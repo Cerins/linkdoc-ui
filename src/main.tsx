@@ -5,13 +5,14 @@ import { Provider } from 'react-redux';
 import './index.css'
 import store from './store.ts'
 import { TextProvider } from './contexts/Text/index.tsx'
+import { SocketProvider } from './contexts/Socket.tsx';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-      <TextProvider>
-        <Provider store={store}>
-            <App />
-        </Provider>
-      </TextProvider>
-  </React.StrictMode>,
+    <TextProvider>
+      <Provider store={store}>
+        <SocketProvider>
+          <App />
+        </SocketProvider>
+      </Provider>
+    </TextProvider>
 )

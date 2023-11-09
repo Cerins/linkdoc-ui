@@ -1,11 +1,11 @@
-import useTextContext, { Locale } from "../../contexts/Text"
+import useTextService, { Locale } from "../../contexts/Text"
 
 function Flag({
     locale
 }: {
     locale: Locale
 }) {
-    const { setLocale } = useTextContext();
+    const { setLocale } = useTextService();
     return (
         <img 
             className="h-6 hover:opacity-75"
