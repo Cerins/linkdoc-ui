@@ -175,6 +175,10 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
       console.log('onClose', event)
     }
     const onMessage = (event: Event)=>{
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data = (event as any).data
+      const newMsg = JSON.parse(data) as  SocketMessage
+      setMessage(newMsg)
       console.log('onMessage', event)
     }
 
@@ -218,3 +222,4 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
 
 export default useSocket;
 export { SocketProvider, SocketStatus };
+export type { SocketMessage }

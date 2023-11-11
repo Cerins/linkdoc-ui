@@ -1,5 +1,5 @@
-import { FormEventHandler, useState } from "react";
-import useSocket, { SocketStatus } from "../contexts/Socket";
+import { FormEventHandler, useEffect, useState } from "react";
+import useSocket, { SocketMessage, SocketStatus } from "../contexts/Socket";
 import useTextContext from "../contexts/Text";
 import { Navigate } from "react-router-dom";
 
@@ -14,10 +14,16 @@ function Disconnected() {
 }
 
 function Connected() {
-  const { status, send } = useSocket();
+  const { status, send, lastMessage } = useSocket();
   const { text } = useTextContext();
   const [type, setType] =useState("");
   const [payload, setPayload] = useState("");
+  const [messages, setMessages] = useState<SocketMessage[]>([])
+  useEffect(()=>{
+    if(lastMessage !== null) {
+      setMessages((msges)=>[lastMessage, ...msges]);
+    }
+  }, [lastMessage])
   const onSubmit: FormEventHandler = (e) => {
     e.preventDefault()
     const payloadJSON = JSON.parse(payload);
@@ -39,6 +45,13 @@ function Connected() {
             <button className="border" type="submit">Send msg</button>
             <br></br>
         </form>
+        <div>
+          {
+            messages.map((msg)=>(
+              <p>{JSON.stringify(msg)}</p>
+            ))
+          }
+        </div>
     </div>
 
   );
