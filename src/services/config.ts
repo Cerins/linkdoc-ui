@@ -1,8 +1,8 @@
-import jsonConfig from '../config/default.json'
+import jsonConfig from "../config/default.json";
 
 interface Config {
-    apiURL: string;
-    socketURL: string;
+  apiURL: string;
+  socketURL: string;
 }
 
 const config: Config = jsonConfig;

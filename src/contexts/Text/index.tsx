@@ -7,12 +7,14 @@ type TextCode = 'LOGIN_USERNAME'
                 | 'ERROR_GENERIC'
                 | 'LANDING_STATUS'
                 | 'LANDING_DISCONNECTED'
+                | 'LOADING'
 
 type Locale = 'lv' | 'en'
 
 interface ITextContext {
     text(code: TextCode): string
     setLocale(locale: Locale): void;
+    locale: Locale
 }
 
 
@@ -41,8 +43,8 @@ const dictionary: Record<Locale, Record<TextCode, string>> = {
         'ERROR_GENERIC': 'Notika neparedzēta kļūda',
         'LOGIN_ERROR_BAD_CREDS': 'Nepareizs lietotājvārds vai parole',
         'LANDING_DISCONNECTED': 'Nav pieslēguma. Pieslēgties ir iespējams: ',
-        'LANDING_STATUS': 'Šobridējais stāvoklis ir '
-
+        'LANDING_STATUS': 'Šobridējais stāvoklis ir ',
+        'LOADING': 'Lādejas'
     },
     'en': {
         'LOGIN_USERNAME': 'Username',
@@ -51,29 +53,31 @@ const dictionary: Record<Locale, Record<TextCode, string>> = {
         'ERROR_GENERIC': 'Unknkown error happened',
         'LOGIN_ERROR_BAD_CREDS': 'Invalid username or password',
         'LANDING_DISCONNECTED': 'Not connect. It is possible to connect through',
-        'LANDING_STATUS': 'The current connection state is '
+        'LANDING_STATUS': 'The current connection state is ',
+        'LOADING': 'Loading'
     }
 
 }
 
 function TextProvider({ children }: { children: React.JSX.Element }) {
-        const [locale, setLocaleState] = useState<Locale>('lv');
-        function setLocale(locale: Locale) {
-            setLocaleState(locale);
-        }
-        function text(code: TextCode) {
-            return dictionary[locale][code];
-        }
+    const [locale, setLocaleState] = useState<Locale>('lv');
+    function setLocale(locale: Locale) {
+        setLocaleState(locale);
+    }
+    function text(code: TextCode) {
+        return dictionary[locale][code];
+    }
 
-        const value = useMemo(()=>({
-            text,
-            setLocale
-        }), [locale]);
-        return (
-            <TextContext.Provider value={value}>
-                {children}
-            </TextContext.Provider>
-        )
+    const value = useMemo(()=>({
+        text,
+        setLocale,
+        locale
+    }), [locale]);
+    return (
+        <TextContext.Provider value={value}>
+            {children}
+        </TextContext.Provider>
+    )
 }
 // TODO fast refresh  works a file export component
 export default useTextContext;
