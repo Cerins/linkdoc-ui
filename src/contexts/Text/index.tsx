@@ -8,6 +8,10 @@ type TextCode = 'LOGIN_USERNAME'
                 | 'LANDING_STATUS'
                 | 'LANDING_DISCONNECTED'
                 | 'LOADING'
+                | 'COLLECTIONS_NAME'
+                | 'COLLECTIONS_USER'
+                | 'COLLECTIONS_TIME'
+
 
 type Locale = 'lv' | 'en'
 
@@ -44,7 +48,10 @@ const dictionary: Record<Locale, Record<TextCode, string>> = {
         'LOGIN_ERROR_BAD_CREDS': 'Nepareizs lietotājvārds vai parole',
         'LANDING_DISCONNECTED': 'Nav pieslēguma. Pieslēgties ir iespējams: ',
         'LANDING_STATUS': 'Šobridējais stāvoklis ir ',
-        'LOADING': 'Lādejas'
+        'LOADING': 'Lādejas',
+        'COLLECTIONS_NAME': 'Nosaukums',
+        'COLLECTIONS_USER': 'Izveidoja',
+        'COLLECTIONS_TIME': 'Pēdējā piekļušana'
     },
     'en': {
         'LOGIN_USERNAME': 'Username',
@@ -54,7 +61,10 @@ const dictionary: Record<Locale, Record<TextCode, string>> = {
         'LOGIN_ERROR_BAD_CREDS': 'Invalid username or password',
         'LANDING_DISCONNECTED': 'Not connect. It is possible to connect through',
         'LANDING_STATUS': 'The current connection state is ',
-        'LOADING': 'Loading'
+        'LOADING': 'Loading',
+        'COLLECTIONS_NAME': 'Name',
+        'COLLECTIONS_USER': 'Created by',
+        'COLLECTIONS_TIME': 'Last accessed'
     }
 
 }

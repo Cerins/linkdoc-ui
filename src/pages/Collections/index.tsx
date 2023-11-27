@@ -8,6 +8,7 @@ import { landed, onMessage } from "../../reducers/collections";
 import { Header, Layout } from "../../components/Header";
 import { Link } from "react-router-dom";
 import prettyDate from "../../utils/prettyDate";
+import Spinner from "../../components/Spinner";
 
 export default function Collections() {
     const { lastMessage, send } = useSocket();
@@ -30,8 +31,19 @@ export default function Collections() {
     }
 
     return (
-        <Layout header={<Header />}>
-            <div className="grid grid-cols-3 p-4 max-w-6xl gap-y-4 mx-auto">
+        <Layout
+            header={
+                <Header
+                    leftItems={<>{collections.status === "loading" && <Spinner />}</>}
+                />
+            }
+        >
+            <div className="grid grid-cols-3 p-4 max-w-6xl mx-auto">
+                <>
+                    <h2 className="p-2 bg-gray-100">{text("COLLECTIONS_NAME")}</h2>
+                    <h2 className="p-2 bg-gray-100">{text("COLLECTIONS_USER")}</h2>
+                    <h2 className="p-2 bg-gray-100">{text("COLLECTIONS_TIME")}</h2>
+                </>
                 {collections.collections.map((col) => (
                     <Link
                         key={col.uuid}
@@ -41,11 +53,11 @@ export default function Collections() {
                         <p className="font-semibold border-b border-l border-t p-2 group-hover:bg-gray-100">
                             {col.name}
                         </p>
-                        <p className="border-b border-t p-2 group-hover:bg-gray-100"></p>
+                        <p className="border-b border-t p-2 group-hover:bg-gray-100">
+                            {col.user}
+                        </p>
                         <p className="text-sm text-gray-600 border-b border-r border-t p-2 group-hover:bg-gray-100">
-                            {
-                                prettyDate(col.time, locale)
-                            }
+                            {prettyDate(col.time, locale)}
                         </p>
                     </Link>
                 ))}

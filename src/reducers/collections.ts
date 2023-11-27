@@ -8,6 +8,7 @@ interface CollectionState {
     uuid: string;
     name: string;
     time: string;
+    user: string;
   }[];
   acknowledge?: string;
 }
@@ -29,7 +30,6 @@ const collectionsSlice = createSlice({
         onMessage(state, action: PayloadAction<SocketMessage | null>) {
             if(action.payload === null) return
             const { type, payload, acknowledge } = action.payload;
-            console.log(type, payload)
             if (type === "COL.READ.OK" && acknowledge === state.acknowledge) {
                 state.status = "loaded";
                 state.collections = payload.collections
