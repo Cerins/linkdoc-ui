@@ -6,18 +6,26 @@ import { useEffect } from "react";
 import luid from "../../utils/luid";
 import { landed, onMessage } from "../../reducers/collections";
 import { Header, Layout } from "../../components/Header";
-import { Link } from "react-router-dom";
-import prettyDate from "../../utils/prettyDate";
 import Spinner from "../../components/Spinner";
+import CollectionList from "./List";
+import { CollectionCreate } from "./Create";
+
+interface Collection {
+  uuid: string;
+  name: string;
+  user: string;
+  time: string;
+}
 
 export default function Collections() {
     const { lastMessage, send } = useSocket();
-    const { text, locale } = useTextContext();
+    const { text } = useTextContext();
     const collections = useSelector((root: IState) => root.collections);
+    const username = useSelector((root: IState) => root.login.username);
     const dispatch = useDispatch();
 
     useEffect(() => {
-        const acknowledge = luid();
+        const acknowledge = luid(username);
         send("COL.READ", {}, acknowledge);
         dispatch(landed(acknowledge));
     }, []);
@@ -38,30 +46,12 @@ export default function Collections() {
                 />
             }
         >
-            <div className="grid grid-cols-3 p-4 max-w-6xl mx-auto">
-                <>
-                    <h2 className="p-2 bg-gray-100">{text("COLLECTIONS_NAME")}</h2>
-                    <h2 className="p-2 bg-gray-100">{text("COLLECTIONS_USER")}</h2>
-                    <h2 className="p-2 bg-gray-100">{text("COLLECTIONS_TIME")}</h2>
-                </>
-                {collections.collections.map((col) => (
-                    <Link
-                        key={col.uuid}
-                        to={`/collections/${col.uuid}`}
-                        className="group contents"
-                    >
-                        <p className="font-semibold border-b border-l border-t p-2 group-hover:bg-gray-100">
-                            {col.name}
-                        </p>
-                        <p className="border-b border-t p-2 group-hover:bg-gray-100">
-                            {col.user}
-                        </p>
-                        <p className="text-sm text-gray-600 border-b border-r border-t p-2 group-hover:bg-gray-100">
-                            {prettyDate(col.time, locale)}
-                        </p>
-                    </Link>
-                ))}
+            <div className="p-4 mx-auto max-w-6xl flex flex-col gap-2">
+                <CollectionCreate collections={collections.collections} />
+                <CollectionList collections={collections.collections}></CollectionList>
             </div>
         </Layout>
     );
 }
+
+export type { Collection };

@@ -1,41 +1,32 @@
-import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { magicNumberGen } from "../services/login";
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 // The first argument of the callback function is actually access to the thunkAPI
 // But since i do not use, i did not select it
-export const increaseByMagicNumber = createAsyncThunk("/login/magic", () => {
-    return magicNumberGen();
-});
+// export const increaseByMagicNumber = createAsyncThunk("/login/magic", () => {
+//     return magicNumberGen();
+// });
+
+const initialState: {
+    username: string | null
+} = {
+    username: null
+}
+
 // So with primitives the reducer should simply return the new value
 // But with objects and arrays i can use mutations
 const loginSlice = createSlice({
     name: "login",
-    initialState: {
-        val: 0,
-    },
+    initialState,
     reducers: {
-        increase: (state, action: PayloadAction<number>) => {
-            state.val += action.payload;
+        setUsername: (state, action: PayloadAction<string>) => {
+            state.username = action.payload;
         },
-        decrease: (state, action: PayloadAction<number>) => {
-            state.val -= action.payload;
-        },
-        zero: (state) => {
-            state.val = 0;
-        },
-    },
-    extraReducers: (builder) => {
-        builder.addCase(increaseByMagicNumber.fulfilled, (state, action) => {
-            state.val += action.payload;
-        });
-        builder.addCase(increaseByMagicNumber.rejected, () => {});
-        builder.addCase(increaseByMagicNumber.pending, () => {});
     },
 });
 
 // This would be an example how it can be used with async operations. Pretty cool, isn't it?
 
-export const { increase, decrease, zero } = loginSlice.actions;
+export const { setUsername } = loginSlice.actions;
 
 const loginReducer = loginSlice.reducer;
 export default loginReducer;

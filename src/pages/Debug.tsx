@@ -48,8 +48,8 @@ export default function Landing() {
                     <br></br>
                 </form>
                 <div>
-                    {messages.map((msg) => (
-                        <p>{JSON.stringify(msg)}</p>
+                    {messages.map((msg, i) => (
+                        <p key={i}>{JSON.stringify(msg)}</p>
                     ))}
                 </div>
                 <Link to={"/collections"}>To collections</Link>

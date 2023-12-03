@@ -6,6 +6,8 @@ import useSocket, { SocketStatus } from "../../contexts/Socket";
 import config from "../../services/config";
 import { useNavigate } from "react-router-dom";
 import { Header, Layout } from "../../components/Header";
+import { useDispatch } from "react-redux";
+import { setUsername } from "../../reducers/login";
 
 function TextInput({
     label,
@@ -54,6 +56,7 @@ function LoginForm() {
     const [disabled, setDisabled] = useState(false);
     const { connect, status } = useSocket();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     useEffect(() => {
         if (disabled && status === SocketStatus.ERROR) {
             setError("ERROR_GENERIC");
@@ -71,12 +74,13 @@ function LoginForm() {
         try {
             setError(null);
             const token = await getLoginToken(name, password);
+            dispatch(setUsername(name));
             connect(`${config.socketURL}?token=${token}`);
         } catch (err) {
             let error: TextCode = "ERROR_GENERIC";
             if (err instanceof Error) {
                 if (err.message === "AUTH_FAILED") {
-                    error = "LOGIN_ERROR_BAD_CREDS";
+                    error = "LOGIN_ERR_BAD_CREDS";
                 }
             }
             console.error(err);
