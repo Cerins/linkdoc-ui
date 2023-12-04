@@ -20,6 +20,7 @@ import luid from "../../utils/luid";
 import { useNavigate } from "react-router-dom";
 import useSocket from "../../contexts/Socket";
 import useModalContext from "../../contexts/Modal";
+import standardDate from "../../utils/date/stamdard";
 
 export function CollectionCreate({
     collections,
@@ -84,7 +85,7 @@ export function CollectionCreate({
                         time: new Date().toISOString(),
                     })
                 );
-                navigate(payload.uuid);
+                navigate(`${payload.uuid}/${standardDate(new Date())}`);
             } else if (type === "COL.CREATE.BAD_REQUEST") {
                 setError(payload.code);
                 dispatch(endCreateCollection());

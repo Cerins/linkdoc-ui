@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import PrivatePath from "./components/PrivatePath";
 import Collections from "./pages/Collections";
 import Collection from "./pages/Collections/Collection";
+import NotFound from "./pages/404";
 
 function App() {
     return (
@@ -26,8 +27,9 @@ function App() {
                         </PrivatePath>
                     }
                 />
+                {/* TODO actually this can continue to be private path, but i need to find a way to start a session without auth and with auth */ }
                 <Route
-                    path="/collections/:uuid"
+                    path="/collections/:uuid/:docName"
                     element={
                         <PrivatePath>
                             <Collection />
@@ -35,6 +37,7 @@ function App() {
                     }
                 />
                 <Route path="/login" element={<Login />} />
+                <Route path="*" element={<NotFound />} />
             </Routes>
         </Router>
     );

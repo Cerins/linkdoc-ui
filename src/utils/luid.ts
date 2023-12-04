@@ -1,10 +1,17 @@
-let counter = 1
+
 
 // Locally unique identifier
+// Starts to work badly in incognito
 export default function luid(username?: string | null) {
+    let counter= Number(localStorage.getItem("counter") ?? 1)
     let luid = String(counter++)
+    if(counter > 2_000_000_000) {
+        // Reset counter at some point
+        counter = 1
+    }
     if(username) {
         luid = `${username}:${luid}`;
     }
+    localStorage.setItem("counter", counter.toString())
     return luid
 }

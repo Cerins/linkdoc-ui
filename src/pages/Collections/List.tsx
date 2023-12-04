@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { Collection } from ".";
 import useTextContext from "../../contexts/Text";
-import prettyDate from "../../utils/prettyDate";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import prettyDate from "../../utils/date/pretty";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import useModalContext from "../../contexts/Modal";
@@ -15,6 +15,7 @@ import {
     endDeleteCollection,
     startDeleteCollection,
 } from "../../reducers/collections";
+import standardDate from "../../utils/date/stamdard";
 
 function List({ children }: { children: ReactNode }) {
     return (
@@ -137,22 +138,23 @@ function DeleteButton({
 function ListItem({ collection: col }: { collection: Collection }) {
     const [disabled, setDisabled] = useState(false);
     const { locale } = useTextContext();
+    const to = useMemo(()=> `${col.uuid}/${standardDate(new Date())}`, [col.uuid])
     return (
         <div key={col.uuid} className="group contents">
             <Link
-                to={apply(!disabled, `/collections/${col.uuid}`, "#")}
+                to={apply(!disabled, to, "#")}
                 className="font-semibold border-b border-l border-t p-2 group-hover:bg-gray-100"
             >
                 {col.name}
             </Link>
             <Link
-                to={apply(!disabled, `/collections/${col.uuid}`, "#")}
+                to={apply(!disabled, to, "#")}
                 className="border-b border-t p-2 group-hover:bg-gray-100"
             >
                 {col.user}
             </Link>
             <Link
-                to={apply(!disabled, `/collections/${col.uuid}`, "#")}
+                to={apply(!disabled, to, "#")}
                 className="text-sm text-gray-600 border-b border-t p-2 group-hover:bg-gray-100"
             >
                 {prettyDate(col.time, locale)}
