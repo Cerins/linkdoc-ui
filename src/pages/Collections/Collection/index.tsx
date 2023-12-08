@@ -141,7 +141,8 @@ function difference(lstStr: string, nwStr: string) {
     }
 
     // Find the rightmost difference
-    while (!foundRight && r >= l && nr >= 0) {
+    // Both nr and r should not go under the l
+    while (!foundRight && r >= l && nr>=l && nr >= 0) {
         if (nwStr[nr] === lstStr[r]) {
             nr--;
             r--;
@@ -183,6 +184,7 @@ function CollectionInit({
 
     const onChange = useCallback((val: string) => {
         const diff = difference(lastText.current, val);
+        console.log(diff)
         if (diff.deleteCount > 0) {
             const ack = luid(username);
             send(
