@@ -1,5 +1,7 @@
 import {
+    ChangeEventHandler,
     Dispatch,
+    MouseEventHandler,
     useCallback,
     useEffect,
     useMemo,
@@ -16,13 +18,14 @@ import useSocket from "../../../contexts/Socket";
 import { IState } from "../../../store";
 import { useSelector } from "react-redux";
 import luid from "../../../utils/luid";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import useModalContext from "../../../contexts/Modal";
 import useTextContext from "../../../contexts/Text";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faPen } from "@fortawesome/free-solid-svg-icons";
+import { faEye, faPen, faSearch } from "@fortawesome/free-solid-svg-icons";
 import "./index.css";
 import { apply } from "../../../utils/css";
+import collectionURL from "../../../utils/collections/url";
 
 function sid() {
     return new Date().getTime();
@@ -66,10 +69,44 @@ function failedLoad(code: "system error") {
     } as const;
 }
 
+function setState(state: CollectionState) {
+    return {
+        type: "SET_STATE",
+        payload: {
+            state,
+        },
+    } as const;
+}
+
+type Transform =
+  | {
+      type: "WRITE";
+      payload: {
+        index: number;
+        text: string;
+      };
+    }
+  | {
+      type: "ERASE";
+      payload: {
+        index: number;
+        count: number;
+      };
+    };
+
+function transformText(transform: Transform) {
+    return {
+        type: "TRANSFORM_TEXT",
+        payload: transform,
+    } as const;
+}
+
 type CollectionAction =
   | ReturnType<typeof initDocument>
   | ReturnType<typeof setText>
-  | ReturnType<typeof failedLoad>;
+  | ReturnType<typeof failedLoad>
+  | ReturnType<typeof setState>
+  | ReturnType<typeof transformText>;
 
 function collectionReducer(
     state: CollectionState,
@@ -80,6 +117,26 @@ function collectionReducer(
         return {
             status: "init",
             text: action.payload.text,
+        };
+    }
+    case "TRANSFORM_TEXT": {
+        let nText = state.text;
+        const { type, payload } = action.payload;
+        if (type === "WRITE") {
+            nText =
+          nText.substring(0, payload.index) +
+          payload.text +
+          nText.substring(payload.index);
+        }
+        if (type === "ERASE") {
+            nText =
+          nText.substring(0, payload.index ) +
+          nText.substring(payload.index  + payload.count);
+        }
+        console.log("transformin", state.text, nText, action.payload);
+        return {
+            ...state,
+            text: nText,
         };
     }
     case "SET_TEXT": {
@@ -93,6 +150,9 @@ function collectionReducer(
             ...state,
             status: action.payload.code,
         };
+    }
+    case "SET_STATE": {
+        return action.payload.state;
     }
     default:
         throw new Error("Unknown collection type");
@@ -142,7 +202,7 @@ function difference(lstStr: string, nwStr: string) {
 
     // Find the rightmost difference
     // Both nr and r should not go under the l
-    while (!foundRight && r >= l && nr>=l && nr >= 0) {
+    while (!foundRight && r >= l && nr >= l && nr >= 0) {
         if (nwStr[nr] === lstStr[r]) {
             nr--;
             r--;
@@ -169,6 +229,85 @@ const enum Mode {
   BOTH = 3,
 }
 
+function SearchButton() {
+    const isInputDisabled = false;
+    const isButtonDisabled = false;
+    const error = "";
+    const { docName, uuid: colUUID } = useParams();
+    const { text } = useTextContext();
+    const navigate = useNavigate();
+
+    const [name, setName] = useState(docName!);
+    useEffect(() => {
+        setName(docName!);
+    }, [docName]);
+    const handleInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
+        setName(e.target.value);
+    };
+    const handleButtonClick: MouseEventHandler<HTMLButtonElement> = () => {
+        console.log("hello word!");
+        console.log(colUUID, docName);
+        navigate(collectionURL(colUUID!, name));
+    };
+
+    return (
+        <div
+            className={`
+                    flex
+                    items-center
+                    border
+                    rounded
+                    ${apply(
+            isInputDisabled,
+            "border-gray-200",
+            "border-gray-300"
+        )}
+                `}
+        >
+            <input
+                disabled={isInputDisabled}
+                type="text"
+                value={name}
+                onChange={handleInputChange}
+                className={`flex-grow 
+                        appearance-none
+                        bg-transparent
+                        w-full
+                        text-gray-700
+                        py-1
+                        px-2
+                        leading-tight
+                        focus:outline-none 
+                        ${apply(error, "border-red-500")}
+                        ${apply(
+            isInputDisabled,
+            "bg-gray-200 text-gray-400 cursor-not-allowed"
+        )}`}
+                placeholder={text("COLLECTIONS_CREATE_PLACEHOLDER")}
+            />
+            <button
+                disabled={isButtonDisabled}
+                type="button"
+                onClick={handleButtonClick}
+                className={`
+                    flex-shrink-0
+                    text-sm
+                    py-1
+                    px-2
+                    rounded-r
+                    ${apply(
+            isButtonDisabled,
+            "bg-gray-200 text-gray-400 cursor-not-allowed",
+            "bg-gray-300 hover:bg-gray-400 text-gray-700"
+        )}
+                    `}
+            >
+                <FontAwesomeIcon icon={faSearch} />
+            </button>
+        </div>
+    );
+}
+
 function CollectionInit({
     state,
     dispatch,
@@ -176,50 +315,69 @@ function CollectionInit({
   state: CollectionState;
   dispatch: Dispatch<CollectionAction>;
 }) {
-    const lastText = useRef(state.text);
     const acknowledges = useRef(new Set<string>());
     const { send } = useSocket();
     const username = useSelector((root: IState) => root.login.username);
     const { docName, uuid: colUUID } = useParams();
+    const { lastMessage } = useSocket();
 
-    const onChange = useCallback((val: string) => {
-        const diff = difference(lastText.current, val);
-        console.log(diff)
-        if (diff.deleteCount > 0) {
-            const ack = luid(username);
-            send(
-                "DOC.ERASE",
-                {
+    const onChange = useCallback(
+        (val: string) => {
+            const diff = difference(state.text, val);
+            if (diff.deleteCount > 0) {
+                const ack = luid(username);
+                send(
+                    "DOC.ERASE",
+                    {
+                        docName,
+                        colUUID,
+                        payload: {
+                            index: diff.index,
+                            sid: sid(),
+                            count: diff.deleteCount,
+                        },
+                    },
+                    ack
+                );
+                acknowledges.current.add(ack);
+            }
+            if (diff.insert !== "") {
+                const ack = luid(username);
+                send("DOC.WRITE", {
                     docName,
                     colUUID,
                     payload: {
                         index: diff.index,
                         sid: sid(),
-                        count: diff.deleteCount,
+                        text: diff.insert,
                     },
-                },
-                ack
-            );
-            acknowledges.current.add(ack);
+                }, ack);
+                acknowledges.current.add(ack);
+            }
+            dispatch(setText(val));
+        },
+        [docName, colUUID, state.text]
+    );
+    useEffect(() => {
+        console.log(lastMessage)
+        if (lastMessage === null) return;
+        console.log(lastMessage.acknowledge)
+        console.log(acknowledges)
+        if (
+            lastMessage.acknowledge &&
+                acknowledges.current.has(lastMessage.acknowledge)
+        ) {
+            acknowledges.current.delete(lastMessage.acknowledge);
+            return;
         }
-        if (diff.insert !== "") {
-            const ack = luid(username);
-            send("DOC.WRITE", {
-                docName,
-                colUUID,
-                payload: {
-                    index: diff.index,
-                    sid: sid(),
-                    text: diff.insert,
-                },
-            });
-            acknowledges.current.add(ack);
+        if (
+            lastMessage.type === "DOC.WRITE.OK" ||
+                lastMessage.type === "DOC.ERASE.OK"
+        ) {
+            const transform = lastMessage.payload.transform;
+            dispatch(transformText(transform));
         }
-        dispatch(setText(val));
-        lastText.current = val;
-    }, []);
-    const [isEditorVisible, setEditorVisible] = useState(true);
-    const [isViewerVisible, setViewerVisible] = useState(true);
+    }, [lastMessage]);
     const [mode, setMode] = useState<Mode>(Mode.BOTH);
     const showEditor = useMemo(
         () => (mode & Mode.EDITOR) === Mode.EDITOR,
@@ -260,21 +418,26 @@ function CollectionInit({
 
     return (
         <Layout header={<Header />}>
-            <div className="flex justify-end px-2 border">
-                <button className="border p-2" onClick={onToggleClick}>
-                    {
-                        <FontAwesomeIcon
-                            className={`${apply(showEditor, "visible", "invisible")} mr-2`}
-                            icon={faPen}
-                        />
-                    }
-                    {
-                        <FontAwesomeIcon
-                            className={`${apply(showRead, "visible", "invisible")}`}
-                            icon={faEye}
-                        />
-                    }
-                </button>
+            <div className="flex">
+                <div className="flex items-center grow">
+                    <SearchButton />
+                </div>
+                <div className="flex shrink justify-end px-2">
+                    <button className="border p-2" onClick={onToggleClick}>
+                        {
+                            <FontAwesomeIcon
+                                className={`${apply(showEditor, "visible", "invisible")} mr-2`}
+                                icon={faPen}
+                            />
+                        }
+                        {
+                            <FontAwesomeIcon
+                                className={`${apply(showRead, "visible", "invisible")}`}
+                                icon={faEye}
+                            />
+                        }
+                    </button>
+                </div>
             </div>
             <div className="split-view">
                 {showEditor && (
@@ -323,6 +486,7 @@ export default function Collection() {
     const { showMessage } = useModalContext();
     const { text } = useTextContext();
     useEffect(() => {
+        dispatch(setState(initialState));
         console.log(docName, colUUID);
         acknowledge.current = luid(username);
         send(
@@ -333,7 +497,7 @@ export default function Collection() {
             },
             acknowledge.current
         );
-    }, []);
+    }, [docName, colUUID]);
 
     useEffect(() => {
         if (lastMessage === null) return;

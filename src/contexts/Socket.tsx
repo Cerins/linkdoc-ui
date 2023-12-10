@@ -5,6 +5,7 @@ import React, {
     useMemo,
     useState,
 } from "react";
+import { flushSync } from "react-dom";
 
 interface SocketMessage<T = any> {
   type: string;
@@ -179,7 +180,13 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
             const data = (event as any).data;
             const newMsg = JSON.parse(data) as SocketMessage;
             console.log("onMessage", event);
-            setMessage(newMsg);
+            // TODO, ah have to use flushSync to stop state buffering
+            // which can hurt performance
+            // but alas
+            // TODO indents further research on the matter
+            flushSync(()=>{
+                setMessage(newMsg);
+            })
         };
 
         const onError = (event: Event) => {

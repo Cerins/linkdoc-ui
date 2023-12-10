@@ -1,5 +1,6 @@
 import React, { ReactNode, useRef, useState } from "react";
 import useTextService, { Locale } from "../../contexts/Text";
+import Logo from "../Logo";
 
 function FlagSelect({
     currentLocale,
@@ -62,6 +63,7 @@ export const Header: React.FC<HeaderTemplateProps> = ({
     return (
         <div className="flex h-12 justify-between items-center p-2 border-b-4">
             <div className="flex justify-start items-center space-x-3">
+                <Logo className="h-9" />
                 {leftItems}
             </div>
             <div className="flex justify-end items-center space-x-3">
