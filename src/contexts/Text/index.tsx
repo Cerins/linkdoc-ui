@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 type TextCodeRemote = "NAME_MAX" | "NAME_MIN";
 
@@ -21,7 +21,9 @@ type TextCode =
   | "COLLECTIONS_TIME"
   | "COLLECTIONS_CREATE_ERR_EMPTY"
   | "COLLECTIONS_CREATE_ERR_EXISTS"
-  | "COLLECTIONS_CREATE_PLACEHOLDER";
+  | "COLLECTIONS_CREATE_PLACEHOLDER"
+  | "LOGIN"
+  | "LOGOUT"
 
 type Locale = "lv" | "en";
 
@@ -70,6 +72,8 @@ const dictionary: Record<Locale, Record<TextCode, string>> = {
         COLLECTIONS_CREATE_ERR_EMPTY: "Nosaukumu vajag ievadīt",
         COLLECTIONS_CREATE_ERR_EXISTS: "Kolekcija jau eksistē",
         COLLECTIONS_CREATE_PLACEHOLDER: "Kolekcijas nosaukums",
+        LOGIN: 'Pieslēgties',
+        LOGOUT: 'Iziet'
     },
     en: {
         NAME_MIN: 'Name too short',
@@ -92,17 +96,35 @@ const dictionary: Record<Locale, Record<TextCode, string>> = {
         COLLECTIONS_CREATE_ERR_EMPTY: "Can not have empty collection",
         COLLECTIONS_CREATE_ERR_EXISTS: "Collection already exists",
         COLLECTIONS_CREATE_PLACEHOLDER: "Collection name",
+        LOGIN: 'Login',
+        LOGOUT: 'Logout'
     },
 };
 
+function localeFromLocalStorage(): Locale {
+    const potentialMatch = window.localStorage.getItem('locale')
+    return (potentialMatch ?? 'lv') as Locale
+}
+
+function localeToLocalStorage(locale: Locale) {
+    window.localStorage.setItem('locale', locale)
+}
+
 function TextProvider({ children }: { children: React.JSX.Element }) {
-    const [locale, setLocaleState] = useState<Locale>("lv");
+    const [locale, setLocaleState] = useState<Locale>(
+        localeFromLocalStorage()
+    );
     function setLocale(locale: Locale) {
         setLocaleState(locale);
     }
     function text(code: TextCode) {
         return dictionary[locale][code] ?? `__${code}__`;
     }
+
+    useEffect(()=>{
+        // Update the local storage locale
+        localeToLocalStorage(locale);
+    }, [locale])
 
     const value = useMemo(
         () => ({

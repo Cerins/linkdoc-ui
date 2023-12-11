@@ -64,8 +64,9 @@ function LoginForm() {
         }
     }, [disabled, status]);
     useEffect(() => {
+        const defaultRoute = "/collections"
         if (status === SocketStatus.CONNECTED) {
-            navigate("/");
+            navigate(defaultRoute);
         }
     }, [status, navigate]);
     async function onSubmit(e: FormEvent) {

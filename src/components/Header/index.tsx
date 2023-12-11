@@ -1,6 +1,8 @@
 import React, { ReactNode, useRef, useState } from "react";
 import useTextService, { Locale } from "../../contexts/Text";
 import Logo from "../Logo";
+import useSocket, { SocketStatus } from "../../contexts/Socket";
+import { Link } from "react-router-dom";
 
 function FlagSelect({
     currentLocale,
@@ -54,6 +56,18 @@ interface HeaderTemplateProps {
   rightItems?: ReactNode;
 }
 
+function SessionToggle() {
+    const { text } = useTextService();
+    const { status } = useSocket();
+    if(status === SocketStatus.CONNECTING) {
+        return <></>
+    }
+    if(status === SocketStatus.CONNECTED) {
+        return <Link className="font-medium text-blue-600 dark:text-blue-500 hover:underline" to={'/logout'}>{text('LOGOUT')}</Link>
+    }
+    return <Link className="font-medium text-blue-600 dark:text-blue-500 hover:underline" to={'/login'}>{text('LOGIN')}</Link>
+}
+
 export const Header: React.FC<HeaderTemplateProps> = ({
     leftItems,
     rightItems,
@@ -69,6 +83,7 @@ export const Header: React.FC<HeaderTemplateProps> = ({
             <div className="flex justify-end items-center space-x-3">
                 <FlagSelect currentLocale={locale} onSelect={setLocale} />
                 {rightItems}
+                <SessionToggle />
             </div>
         </div>
     );

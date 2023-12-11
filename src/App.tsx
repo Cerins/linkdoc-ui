@@ -6,6 +6,7 @@ import PrivatePath from "./components/PrivatePath";
 import Collections from "./pages/Collections";
 import Collection from "./pages/Collections/Collection";
 import NotFound from "./pages/404";
+import Logout from "./pages/Logout";
 
 function App() {
     return (
@@ -37,6 +38,7 @@ function App() {
                     }
                 />
                 <Route path="/login" element={<Login />} />
+                <Route path="/logout" element={<Logout />} />
                 <Route path="*" element={<NotFound />} />
             </Routes>
         </Router>
