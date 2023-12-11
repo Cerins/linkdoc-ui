@@ -6,6 +6,7 @@ import store from './store.ts'
 import { TextProvider } from './contexts/Text/index.tsx'
 import { SocketProvider } from './contexts/Socket.tsx';
 import { ModalProvider } from './contexts/Modal.tsx';
+import 'react-calendar/dist/Calendar.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <TextProvider>

@@ -22,10 +22,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import useModalContext from "../../../contexts/Modal";
 import useTextContext from "../../../contexts/Text";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faPen, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faCalendar, faEye, faPen, faSearch } from "@fortawesome/free-solid-svg-icons";
 import "./index.css";
 import { apply } from "../../../utils/css";
 import collectionURL from "../../../utils/collections/url";
+import Calendar from "react-calendar";
+import standardDate from "../../../utils/date/stamdard";
 
 function sid() {
     return new Date().getTime();
@@ -308,6 +310,38 @@ function SearchButton() {
     );
 }
 
+function DatePicker({
+    date,
+    setDate
+}: {
+    date: Date | null
+    setDate: (date: Date | null)=>void
+}) {
+    const { locale } = useTextContext();
+    const [visible, setVisible] = useState(false)
+    return (
+        <div>
+            <FontAwesomeIcon
+                icon={faCalendar}
+                className="hover:text-gray-600 p-2"
+                onClick={()=>{
+                    setVisible((v)=>!v)
+                }}
+            />
+            <Calendar
+                className={`absolute z-10 ${apply(visible, "visible", "invisible")}`}
+                locale={locale} 
+                value={date} 
+                selectRange={false}
+                onChange={(e)=>{
+                    setVisible(false)
+                    setDate(e as Date | null)
+                }} 
+            />
+        </div>
+    )
+}
+
 function CollectionInit({
     state,
     dispatch,
@@ -320,6 +354,7 @@ function CollectionInit({
     const username = useSelector((root: IState) => root.login.username);
     const { docName, uuid: colUUID } = useParams();
     const { emitter } = useSocket();
+    const navigate = useNavigate();
 
     const onChange = useCallback(
         (val: string) => {
@@ -422,11 +457,18 @@ function CollectionInit({
         setMode((mode) => (mode % Mode.BOTH) + 1);
     }
 
+    function onDatePick(date: Date | null)  {
+        if(date === null) return;
+        const stDate = standardDate(date);
+        navigate(collectionURL(colUUID!, stDate));
+    }
+
     return (
         <Layout header={<Header />}>
             <div className="flex">
                 <div className="flex items-center grow">
                     <SearchButton />
+                    <DatePicker date={null} setDate={onDatePick} />
                 </div>
                 <div className="flex shrink justify-end px-2">
                     <button className="border p-2" onClick={onToggleClick}>
