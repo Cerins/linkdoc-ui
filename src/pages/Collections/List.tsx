@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import useModalContext from "../../contexts/Modal";
 import { apply } from "../../utils/css";
-import useSocket from "../../contexts/Socket";
+import useSocket, { SocketMessage } from "../../contexts/Socket";
 import luid from "../../utils/luid";
 import { useDispatch, useSelector } from "react-redux";
 import { IState } from "../../store";
@@ -53,7 +53,7 @@ function DeleteButton({
 }) {
     const { showMessage } = useModalContext();
     const { text } = useTextContext();
-    const { send, lastMessage } = useSocket();
+    const { send, emitter } = useSocket();
     const username = useSelector((root: IState) => root.login.username);
     const acknowledge = useRef<string>("");
     const dispatch = useDispatch();
@@ -70,26 +70,32 @@ function DeleteButton({
         );
     };
     useEffect(() => {
-        if (lastMessage === null) return;
-        const { acknowledge: cAck, type } = lastMessage;
-        if (acknowledge.current === cAck) {
-            let deletedItem: string | undefined;
-            if (type === "COL.DELETE.OK") {
-                deletedItem = collection.uuid;
-            } else {
-                showMessage({
-                    message: text("ERROR_GENERIC"),
-                    buttons: [
-                        {
-                            name: text("BUTTON_OK"),
-                            callback: () => {},
-                        },
-                    ],
-                });
+        const listener = (lastMessage: SocketMessage) => {
+            if (lastMessage === null) return;
+            const { acknowledge: cAck, type } = lastMessage;
+            if (acknowledge.current === cAck) {
+                let deletedItem: string | undefined;
+                if (type === "COL.DELETE.OK") {
+                    deletedItem = collection.uuid;
+                } else {
+                    showMessage({
+                        message: text("ERROR_GENERIC"),
+                        buttons: [
+                            {
+                                name: text("BUTTON_OK"),
+                                callback: () => {},
+                            },
+                        ],
+                    });
+                }
+                dispatch(endDeleteCollection(deletedItem));
             }
-            dispatch(endDeleteCollection(deletedItem));
         }
-    }, [lastMessage]);
+        emitter.addListener('message', listener);
+        return ()=>{
+            emitter.removeListener('message', listener);
+        }
+    }, []);
     const handleDelete = () => {
         showMessage({
             message: text("DELETE_CONFIRM"),

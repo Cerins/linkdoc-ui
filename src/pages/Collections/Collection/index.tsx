@@ -14,7 +14,7 @@ import Markdown from "react-markdown";
 import CodeMirror from "@uiw/react-codemirror";
 import { markdown } from "@codemirror/lang-markdown";
 import Spinner from "../../../components/Spinner";
-import useSocket from "../../../contexts/Socket";
+import useSocket, { SocketMessage } from "../../../contexts/Socket";
 import { IState } from "../../../store";
 import { useSelector } from "react-redux";
 import luid from "../../../utils/luid";
@@ -319,7 +319,7 @@ function CollectionInit({
     const { send } = useSocket();
     const username = useSelector((root: IState) => root.login.username);
     const { docName, uuid: colUUID } = useParams();
-    const { lastMessage } = useSocket();
+    const { emitter } = useSocket();
 
     const onChange = useCallback(
         (val: string) => {
@@ -359,25 +359,31 @@ function CollectionInit({
         [docName, colUUID, state.text]
     );
     useEffect(() => {
-        console.log(lastMessage)
-        if (lastMessage === null) return;
-        console.log(lastMessage.acknowledge)
-        console.log(acknowledges)
-        if (
-            lastMessage.acknowledge &&
+        const listener = (lastMessage: SocketMessage) => {
+            console.log(lastMessage)
+            if (lastMessage === null) return;
+            console.log(lastMessage.acknowledge)
+            console.log(acknowledges)
+            if (
+                lastMessage.acknowledge &&
                 acknowledges.current.has(lastMessage.acknowledge)
-        ) {
-            acknowledges.current.delete(lastMessage.acknowledge);
-            return;
-        }
-        if (
-            lastMessage.type === "DOC.WRITE.OK" ||
+            ) {
+                acknowledges.current.delete(lastMessage.acknowledge);
+                return;
+            }
+            if (
+                lastMessage.type === "DOC.WRITE.OK" ||
                 lastMessage.type === "DOC.ERASE.OK"
-        ) {
-            const transform = lastMessage.payload.transform;
-            dispatch(transformText(transform));
+            ) {
+                const transform = lastMessage.payload.transform;
+                dispatch(transformText(transform));
+            }
         }
-    }, [lastMessage]);
+        emitter.addListener('message', listener);
+        return ()=>{
+            emitter.removeListener('message', listener);
+        }
+    }, []);
     const [mode, setMode] = useState<Mode>(Mode.BOTH);
     const showEditor = useMemo(
         () => (mode & Mode.EDITOR) === Mode.EDITOR,
@@ -479,7 +485,7 @@ function CollectionInit({
 
 export default function Collection() {
     const [state, dispatch] = useReducer(collectionReducer, initialState);
-    const { lastMessage, send } = useSocket();
+    const { emitter, send } = useSocket();
     const acknowledge = useRef<string>("");
     const username = useSelector((root: IState) => root.login.username);
     const { docName, uuid: colUUID } = useParams();
@@ -500,27 +506,33 @@ export default function Collection() {
     }, [docName, colUUID]);
 
     useEffect(() => {
-        if (lastMessage === null) return;
-        const { type, payload, acknowledge: cAck } = lastMessage;
-        if (acknowledge.current === cAck) {
-            if (type === "DOC.READ.OK") {
-                const { text } = payload;
-                dispatch(initDocument(text));
-            } else {
-                showMessage({
-                    message: text("ERROR_GENERIC"),
-                    buttons: [
-                        {
-                            name: text("BUTTON_OK"),
-                            callback: () => {},
-                        },
-                    ],
-                });
-                dispatch(failedLoad("system error"));
+        const listener = (lastMessage: SocketMessage) => {
+            if (lastMessage === null) return;
+            const { type, payload, acknowledge: cAck } = lastMessage;
+            if (acknowledge.current === cAck) {
+                if (type === "DOC.READ.OK") {
+                    const { text } = payload;
+                    dispatch(initDocument(text));
+                } else {
+                    showMessage({
+                        message: text("ERROR_GENERIC"),
+                        buttons: [
+                            {
+                                name: text("BUTTON_OK"),
+                                callback: () => {},
+                            },
+                        ],
+                    });
+                    dispatch(failedLoad("system error"));
+                }
+                console.log(type, payload);
             }
-            console.log(type, payload);
         }
-    }, [lastMessage]);
+        emitter.addListener('message', listener);
+        return ()=>{
+            emitter.removeListener('message', listener);
+        }
+    }, []);
 
     switch (state.status) {
     case "fresh": {

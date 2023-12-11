@@ -5,16 +5,22 @@ import { Link } from "react-router-dom";
 import { Header, Layout } from "../components/Header";
 
 export default function Landing() {
-    const { status, send, lastMessage } = useSocket();
+    const { status, send, emitter } = useSocket();
     const { text } = useTextContext();
     const [type, setType] = useState("");
     const [payload, setPayload] = useState("");
     const [messages, setMessages] = useState<SocketMessage[]>([]);
     useEffect(() => {
-        if (lastMessage !== null) {
-            setMessages((msges) => [lastMessage, ...msges]);
+        const listener = (lastMessage: SocketMessage) => {
+            if (lastMessage !== null) {
+                setMessages((msges) => [lastMessage, ...msges]);
+            }
         }
-    }, [lastMessage]);
+        emitter.addListener('message', listener);
+        return ()=>{
+            emitter.removeListener('message', listener);
+        }
+    }, []);
     const onSubmit: FormEventHandler = (e) => {
         e.preventDefault();
         const payloadJSON = JSON.parse(payload);

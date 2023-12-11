@@ -1,3 +1,4 @@
+import { EventEmitter } from "events";
 import React, {
     createContext,
     useContext,
@@ -5,7 +6,6 @@ import React, {
     useMemo,
     useState,
 } from "react";
-import { flushSync } from "react-dom";
 
 interface SocketMessage<T = any> {
   type: string;
@@ -146,7 +146,7 @@ const enum SocketStatus {
 interface ISocketContext {
   connect: (url: string) => void;
   disconnect: () => void;
-  lastMessage: SocketMessage | null;
+  emitter: EventEmitter
   status: SocketStatus;
   send: (type: string, payload: unknown, acknowledge?: string) => void;
 }
@@ -163,8 +163,8 @@ function useSocket() {
 
 function SocketProvider({ children }: { children: React.ReactNode }) {
     const socket = useMemo(() => Socket.getInstance(), []);
-    const [message, setMessage] = useState<SocketMessage | null>(null);
     const [status, setStatus] = useState<SocketStatus>(SocketStatus.DISCONNECTED);
+    const emitter = useMemo(()=> new EventEmitter(), [])
 
     useEffect(() => {
         const onOpen = (event: Event) => {
@@ -180,13 +180,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
             const data = (event as any).data;
             const newMsg = JSON.parse(data) as SocketMessage;
             console.log("onMessage", event);
-            // TODO, ah have to use flushSync to stop state buffering
-            // which can hurt performance
-            // but alas
-            // TODO indents further research on the matter
-            flushSync(()=>{
-                setMessage(newMsg);
-            })
+            emitter.emit('message', newMsg);
         };
 
         const onError = (event: Event) => {
@@ -218,9 +212,9 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
                 socket.send(type, payload, acknowledge);
             },
             status,
-            lastMessage: message,
+            emitter,
         }),
-        [status, setStatus, message, socket]
+        [status, setStatus, emitter, socket]
     );
     return (
         <SocketContext.Provider value={value}>{children}</SocketContext.Provider>

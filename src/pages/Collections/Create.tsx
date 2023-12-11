@@ -18,7 +18,7 @@ import {
 } from "../../reducers/collections";
 import luid from "../../utils/luid";
 import { useNavigate } from "react-router-dom";
-import useSocket from "../../contexts/Socket";
+import useSocket, { SocketMessage } from "../../contexts/Socket";
 import useModalContext from "../../contexts/Modal";
 import standardDate from "../../utils/date/stamdard";
 import collectionURL from "../../utils/collections/url";
@@ -38,7 +38,7 @@ export function CollectionCreate({
     const acknowledge = useRef<string>("");
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { lastMessage, send } = useSocket();
+    const { emitter, send } = useSocket();
     const { showMessage } = useModalContext();
 
     // Checks if has errors
@@ -75,36 +75,42 @@ export function CollectionCreate({
     };
 
     useEffect(() => {
-        if (lastMessage === null) return;
-        const { type, payload, acknowledge: incoming } = lastMessage;
-        if (incoming === acknowledge.current) {
-            if (type === "COL.CREATE.OK") {
-                const collection = payload;
-                dispatch(
-                    endCreateCollection({
-                        ...collection,
-                        time: new Date().toISOString(),
-                    })
-                );
-                navigate(collectionURL(payload.uuid, standardDate(new Date())));
-            } else if (type === "COL.CREATE.BAD_REQUEST") {
-                setError(payload.code);
-                dispatch(endCreateCollection());
-            } else {
-                console.error("unk error", payload);
-                showMessage({
-                    message: text("ERROR_GENERIC"),
-                    buttons: [
-                        {
-                            name: text("BUTTON_OK"),
-                            callback: () => {},
-                        },
-                    ],
-                });
-                dispatch(endCreateCollection());
+        const listener = (lastMessage: SocketMessage) => {
+            if (lastMessage === null) return;
+            const { type, payload, acknowledge: incoming } = lastMessage;
+            if (incoming === acknowledge.current) {
+                if (type === "COL.CREATE.OK") {
+                    const collection = payload;
+                    dispatch(
+                        endCreateCollection({
+                            ...collection,
+                            time: new Date().toISOString(),
+                        })
+                    );
+                    navigate(collectionURL(payload.uuid, standardDate(new Date())));
+                } else if (type === "COL.CREATE.BAD_REQUEST") {
+                    setError(payload.code);
+                    dispatch(endCreateCollection());
+                } else {
+                    console.error("unk error", payload);
+                    showMessage({
+                        message: text("ERROR_GENERIC"),
+                        buttons: [
+                            {
+                                name: text("BUTTON_OK"),
+                                callback: () => {},
+                            },
+                        ],
+                    });
+                    dispatch(endCreateCollection());
+                }
             }
         }
-    }, [lastMessage]);
+        emitter.addListener('message', listener);
+        return ()=>{
+            emitter.removeListener('message', listener);
+        }
+    }, []);
 
     const isInputDisabled = createActive;
     const isButtonDisabled = createActive || Boolean(error);
