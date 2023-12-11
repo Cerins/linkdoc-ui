@@ -18,11 +18,16 @@ import useSocket, { SocketMessage } from "../../../contexts/Socket";
 import { IState } from "../../../store";
 import { useSelector } from "react-redux";
 import luid from "../../../utils/luid";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import useModalContext from "../../../contexts/Modal";
 import useTextContext from "../../../contexts/Text";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendar, faEye, faPen, faSearch } from "@fortawesome/free-solid-svg-icons";
+import {
+    faCalendar,
+    faEye,
+    faPen,
+    faSearch,
+} from "@fortawesome/free-solid-svg-icons";
 import "./index.css";
 import { apply } from "../../../utils/css";
 import collectionURL from "../../../utils/collections/url";
@@ -132,10 +137,9 @@ function collectionReducer(
         }
         if (type === "ERASE") {
             nText =
-          nText.substring(0, payload.index ) +
-          nText.substring(payload.index  + payload.count);
+          nText.substring(0, payload.index) +
+          nText.substring(payload.index + payload.count);
         }
-        console.log("transformin", state.text, nText, action.payload);
         return {
             ...state,
             text: nText,
@@ -247,8 +251,6 @@ function SearchButton() {
         setName(e.target.value);
     };
     const handleButtonClick: MouseEventHandler<HTMLButtonElement> = () => {
-        console.log("hello word!");
-        console.log(colUUID, docName);
         navigate(collectionURL(colUUID!, name));
     };
 
@@ -312,34 +314,34 @@ function SearchButton() {
 
 function DatePicker({
     date,
-    setDate
+    setDate,
 }: {
-    date: Date | null
-    setDate: (date: Date | null)=>void
+  date: Date | null;
+  setDate: (date: Date | null) => void;
 }) {
     const { locale } = useTextContext();
-    const [visible, setVisible] = useState(false)
+    const [visible, setVisible] = useState(false);
     return (
         <div>
             <FontAwesomeIcon
                 icon={faCalendar}
                 className="hover:text-gray-600 p-2"
-                onClick={()=>{
-                    setVisible((v)=>!v)
+                onClick={() => {
+                    setVisible((v) => !v);
                 }}
             />
             <Calendar
                 className={`absolute z-10 ${apply(visible, "visible", "invisible")}`}
-                locale={locale} 
-                value={date} 
+                locale={locale}
+                value={date}
                 selectRange={false}
-                onChange={(e)=>{
-                    setVisible(false)
-                    setDate(e as Date | null)
-                }} 
+                onChange={(e) => {
+                    setVisible(false);
+                    setDate(e as Date | null);
+                }}
             />
         </div>
-    )
+    );
 }
 
 function CollectionInit({
@@ -378,15 +380,19 @@ function CollectionInit({
             }
             if (diff.insert !== "") {
                 const ack = luid(username);
-                send("DOC.WRITE", {
-                    docName,
-                    colUUID,
-                    payload: {
-                        index: diff.index,
-                        sid: sid(),
-                        text: diff.insert,
+                send(
+                    "DOC.WRITE",
+                    {
+                        docName,
+                        colUUID,
+                        payload: {
+                            index: diff.index,
+                            sid: sid(),
+                            text: diff.insert,
+                        },
                     },
-                }, ack);
+                    ack
+                );
                 acknowledges.current.add(ack);
             }
             dispatch(setText(val));
@@ -395,13 +401,10 @@ function CollectionInit({
     );
     useEffect(() => {
         const listener = (lastMessage: SocketMessage) => {
-            console.log(lastMessage)
             if (lastMessage === null) return;
-            console.log(lastMessage.acknowledge)
-            console.log(acknowledges)
             if (
                 lastMessage.acknowledge &&
-                acknowledges.current.has(lastMessage.acknowledge)
+        acknowledges.current.has(lastMessage.acknowledge)
             ) {
                 acknowledges.current.delete(lastMessage.acknowledge);
                 return;
@@ -413,11 +416,11 @@ function CollectionInit({
                 const transform = lastMessage.payload.transform;
                 dispatch(transformText(transform));
             }
-        }
-        emitter.addListener('message', listener);
-        return ()=>{
-            emitter.removeListener('message', listener);
-        }
+        };
+        emitter.addListener("message", listener);
+        return () => {
+            emitter.removeListener("message", listener);
+        };
     }, []);
     const [mode, setMode] = useState<Mode>(Mode.BOTH);
     const showEditor = useMemo(
@@ -457,11 +460,55 @@ function CollectionInit({
         setMode((mode) => (mode % Mode.BOTH) + 1);
     }
 
-    function onDatePick(date: Date | null)  {
-        if(date === null) return;
+    function onDatePick(date: Date | null) {
+        if (date === null) return;
         const stDate = standardDate(date);
         navigate(collectionURL(colUUID!, stDate));
     }
+    const CollectionLink = ({ children, href }: any) => {
+    // Check if the text inside the link matches [[ ]]
+        if (
+            children &&
+      children[0] &&
+      typeof children[0] === "string" &&
+      children[0].startsWith("[[") &&
+      children[0].endsWith("]]")
+        ) {
+            // Extract the content inside [[ ]]
+            const customContent = children[0].slice(2, -2);
+            console.log(children);
+            console.log(href);
+
+            const newHref = `/custom/path/${customContent}`;
+
+            return <a href={newHref}>{children}</a>;
+        }
+
+        // Default rendering for other links
+        return <a href={href}>{children}</a>;
+    };
+    const processCustomLinks = (markdown: string) => {
+        // TODO []([[]]) syntax
+        // Have to allow custom [[]] syntax
+        return markdown.replace(/\[\[(.*?)\]\]/g, (_, content) => {
+            // Create a custom URL or perform other logic based on 'content'
+            const customUrl = collectionURL(colUUID!, content);
+            return `[${content}](${customUrl})`;
+        });
+    };
+    const UseLink = ({ children, href }: any) => {
+    // Check if the href should be handled by React Router
+        if (href.startsWith("/")) {
+            return <Link to={href}>{children}</Link>;
+        }
+
+        // For external links, use a regular <a> tag
+        return (
+            <a href={href} target="_blank" rel="noopener noreferrer">
+                {children}
+            </a>
+        );
+    };
 
     return (
         <Layout header={<Header />}>
@@ -517,7 +564,14 @@ function CollectionInit({
                             flex: `1 1`,
                         }}
                     >
-                        <Markdown className={"markdown"}>{state.text}</Markdown>
+                        <Markdown
+                            components={{
+                                a: UseLink,
+                            }}
+                            className={"markdown"}
+                        >
+                            {processCustomLinks(state.text)}
+                        </Markdown>
                     </div>
                 )}
             </div>
@@ -535,7 +589,6 @@ export default function Collection() {
     const { text } = useTextContext();
     useEffect(() => {
         dispatch(setState(initialState));
-        console.log(docName, colUUID);
         acknowledge.current = luid(username);
         send(
             "DOC.READ",
@@ -567,13 +620,12 @@ export default function Collection() {
                     });
                     dispatch(failedLoad("system error"));
                 }
-                console.log(type, payload);
             }
-        }
-        emitter.addListener('message', listener);
-        return ()=>{
-            emitter.removeListener('message', listener);
-        }
+        };
+        emitter.addListener("message", listener);
+        return () => {
+            emitter.removeListener("message", listener);
+        };
     }, []);
 
     switch (state.status) {
