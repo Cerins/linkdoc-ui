@@ -465,28 +465,6 @@ function CollectionInit({
         const stDate = standardDate(date);
         navigate(collectionURL(colUUID!, stDate));
     }
-    const CollectionLink = ({ children, href }: any) => {
-    // Check if the text inside the link matches [[ ]]
-        if (
-            children &&
-      children[0] &&
-      typeof children[0] === "string" &&
-      children[0].startsWith("[[") &&
-      children[0].endsWith("]]")
-        ) {
-            // Extract the content inside [[ ]]
-            const customContent = children[0].slice(2, -2);
-            console.log(children);
-            console.log(href);
-
-            const newHref = `/custom/path/${customContent}`;
-
-            return <a href={newHref}>{children}</a>;
-        }
-
-        // Default rendering for other links
-        return <a href={href}>{children}</a>;
-    };
     const processCustomLinks = (markdown: string) => {
         // TODO []([[]]) syntax
         // Have to allow custom [[]] syntax

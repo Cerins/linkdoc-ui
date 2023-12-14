@@ -24,6 +24,7 @@ type TextCode =
   | "COLLECTIONS_CREATE_PLACEHOLDER"
   | "LOGIN"
   | "LOGOUT"
+  | "REMEMBER_ME"
 
 type Locale = "lv" | "en";
 
@@ -73,7 +74,8 @@ const dictionary: Record<Locale, Record<TextCode, string>> = {
         COLLECTIONS_CREATE_ERR_EXISTS: "Kolekcija jau eksistē",
         COLLECTIONS_CREATE_PLACEHOLDER: "Kolekcijas nosaukums",
         LOGIN: 'Pieslēgties',
-        LOGOUT: 'Iziet'
+        LOGOUT: 'Iziet',
+        REMEMBER_ME: 'Atcerēties pieslēgšanos'
     },
     en: {
         NAME_MIN: 'Name too short',
@@ -97,7 +99,8 @@ const dictionary: Record<Locale, Record<TextCode, string>> = {
         COLLECTIONS_CREATE_ERR_EXISTS: "Collection already exists",
         COLLECTIONS_CREATE_PLACEHOLDER: "Collection name",
         LOGIN: 'Login',
-        LOGOUT: 'Logout'
+        LOGOUT: 'Logout',
+        REMEMBER_ME: 'Remember login'
     },
 };
 

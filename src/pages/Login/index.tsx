@@ -1,13 +1,14 @@
 import { FormEvent, useEffect, useState } from "react";
 import useTextService, { TextCode } from "../../contexts/Text";
 import { apply } from "../../utils/css";
-import { getLoginToken } from "../../services/login";
+import { getLoginToken, loginThroughSession } from "../../services/login";
 import useSocket, { SocketStatus } from "../../contexts/Socket";
 import config from "../../services/config";
-import { useNavigate } from "react-router-dom";
+import { To, useLocation, useNavigate } from "react-router-dom";
 import { Header, Layout } from "../../components/Header";
 import { useDispatch } from "react-redux";
 import { setUsername } from "../../reducers/login";
+import Spinner from "../../components/Spinner";
 
 function TextInput({
     label,
@@ -54,6 +55,9 @@ function LoginForm() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState<TextCode | null>(null);
     const [disabled, setDisabled] = useState(false);
+    const [tryCookie, setTryCookie] = useState(true);
+    const [remember, setRemember] = useState(true);
+    const currentLocation = (useLocation() as { state?: {from?: To}});
     const { connect, status } = useSocket();
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -63,20 +67,26 @@ function LoginForm() {
             setDisabled(false);
         }
     }, [disabled, status]);
+    console.log(currentLocation)
     useEffect(() => {
-        const defaultRoute = "/collections"
+        const defaultRoute = currentLocation.state?.from ?? "/collections"
         if (status === SocketStatus.CONNECTED) {
             navigate(defaultRoute);
         }
-    }, [status, navigate]);
+    }, [status, navigate, currentLocation]);
+
+    function onToken(token: string, name: string) {
+        dispatch(setUsername(name));
+        connect(`${config.socketURL}?token=${token}`);
+    }
+
     async function onSubmit(e: FormEvent) {
         setDisabled(true);
         e.preventDefault();
         try {
             setError(null);
-            const token = await getLoginToken(name, password);
-            dispatch(setUsername(name));
-            connect(`${config.socketURL}?token=${token}`);
+            const token = await getLoginToken(name, password, remember);
+            onToken(token, name);
         } catch (err) {
             let error: TextCode = "ERROR_GENERIC";
             if (err instanceof Error) {
@@ -90,6 +100,23 @@ function LoginForm() {
         } finally {
             // setDisabled(false);
         }
+    }
+    useEffect(()=>{
+        if(tryCookie) {
+            (async ()=>{
+                try{
+                    const { name, token } = await loginThroughSession()
+                    onToken(token, name)
+                } catch(err) {
+                    setTryCookie(false);
+                }
+            })()
+        }
+    }, [tryCookie])
+    if(tryCookie) {
+        return (
+            <Spinner />
+        )
     }
     return (
         <form
@@ -112,6 +139,18 @@ function LoginForm() {
                 error={error || ""}
                 disabled={disabled}
             />
+            <div className="flex justify-center items-center">
+                <label className="inline-flex items-center">
+                    <input
+                        type="checkbox"
+                        className="form-checkbox h-5 w-5 text-blue-600"
+                        checked={remember}
+                        onChange={(e)=>setRemember(e.target.checked)}
+                    />
+                    <span className="ml-2 text-gray-600">{text("REMEMBER_ME")}</span>
+                </label>
+            </div>
+
             <p
                 className={`bg-rose-400 text-white rounded-2xl p-2 ${apply(
                     error,
@@ -121,6 +160,7 @@ function LoginForm() {
             >
                 {error ? text(error) : " "}
             </p>
+
             <button
                 disabled={disabled}
                 type="submit"

@@ -1,12 +1,15 @@
 import { ReactNode } from "react";
 import useSocket, { SocketStatus } from "../contexts/Socket";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 
 // Handle other two cases
 function Disconnected() {
+    const location = useLocation();
     return (
         <div>
-            <Navigate to="/login" />
+            <Navigate state={{
+                from: location
+            }} to="/login" />
         </div>
     );
 }
