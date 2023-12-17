@@ -22,9 +22,11 @@ type TextCode =
   | "COLLECTIONS_CREATE_ERR_EMPTY"
   | "COLLECTIONS_CREATE_ERR_EXISTS"
   | "COLLECTIONS_CREATE_PLACEHOLDER"
+  | "DOCUMENTS_NAME"
   | "LOGIN"
   | "LOGOUT"
   | "REMEMBER_ME"
+  | "SHARE"
 
 type Locale = "lv" | "en";
 
@@ -73,9 +75,11 @@ const dictionary: Record<Locale, Record<TextCode, string>> = {
         COLLECTIONS_CREATE_ERR_EMPTY: "Nosaukumu vajag ievadīt",
         COLLECTIONS_CREATE_ERR_EXISTS: "Kolekcija jau eksistē",
         COLLECTIONS_CREATE_PLACEHOLDER: "Kolekcijas nosaukums",
+        DOCUMENTS_NAME: "Nosaukums",
         LOGIN: 'Pieslēgties',
         LOGOUT: 'Iziet',
-        REMEMBER_ME: 'Atcerēties pieslēgšanos'
+        REMEMBER_ME: 'Atcerēties pieslēgšanos',
+        SHARE: "Koplietot"
     },
     en: {
         NAME_MIN: 'Name too short',
@@ -98,9 +102,11 @@ const dictionary: Record<Locale, Record<TextCode, string>> = {
         COLLECTIONS_CREATE_ERR_EMPTY: "Can not have empty collection",
         COLLECTIONS_CREATE_ERR_EXISTS: "Collection already exists",
         COLLECTIONS_CREATE_PLACEHOLDER: "Collection name",
+        DOCUMENTS_NAME: "Name",
         LOGIN: 'Login',
         LOGOUT: 'Logout',
-        REMEMBER_ME: 'Remember login'
+        REMEMBER_ME: 'Remember login',
+        SHARE: "Share"
     },
 };
 

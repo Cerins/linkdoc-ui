@@ -144,7 +144,7 @@ function DeleteButton({
 function ListItem({ collection: col }: { collection: Collection }) {
     const [disabled, setDisabled] = useState(false);
     const { locale } = useTextContext();
-    const to = useMemo(()=> `/collections/${col.uuid}/${standardDate(new Date())}`, [col.uuid])
+    const to = useMemo(()=> `/collections/${col.uuid}/${col.defaultDocument ?? standardDate(new Date())}`, [col.uuid])
     return (
         <div key={col.uuid} className="group contents">
             <Link

@@ -15,6 +15,7 @@ interface Collection {
   name: string;
   user: string;
   time: string;
+  defaultDocument: string | null;
 }
 
 export default function Collections() {

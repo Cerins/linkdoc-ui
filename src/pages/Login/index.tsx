@@ -67,7 +67,6 @@ function LoginForm() {
             setDisabled(false);
         }
     }, [disabled, status]);
-    console.log(currentLocation)
     useEffect(() => {
         const defaultRoute = currentLocation.state?.from ?? "/collections"
         if (status === SocketStatus.CONNECTED) {

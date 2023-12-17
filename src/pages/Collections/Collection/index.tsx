@@ -33,10 +33,9 @@ import { apply } from "../../../utils/css";
 import collectionURL from "../../../utils/collections/url";
 import Calendar from "react-calendar";
 import standardDate from "../../../utils/date/stamdard";
+import { faShare } from '@fortawesome/free-solid-svg-icons';
+import { sid } from "./utils";
 
-function sid() {
-    return new Date().getTime();
-}
 
 interface CollectionState {
   status:
@@ -49,11 +48,14 @@ interface CollectionState {
   text: string;
 }
 
-function initDocument(text: string) {
+function initDocument(document: {
+    text: string,
+    visibility: "read" | "write"
+}) {
     return {
         type: "INIT_DOCUMENT",
         payload: {
-            text,
+            ...document,
         },
     } as const;
 }
@@ -287,7 +289,7 @@ function SearchButton() {
             isInputDisabled,
             "bg-gray-200 text-gray-400 cursor-not-allowed"
         )}`}
-                placeholder={text("COLLECTIONS_CREATE_PLACEHOLDER")}
+                placeholder={text("DOCUMENTS_NAME")}
             />
             <button
                 disabled={isButtonDisabled}
@@ -341,6 +343,33 @@ function DatePicker({
                 }}
             />
         </div>
+    );
+}
+
+
+function Share() {
+    const { text } = useTextContext();
+    return (
+        <button
+            type="button"
+            className={`
+                flex-shrink-0
+                text-sm
+                py-1
+                px-2
+                rounded-full
+                bg-white
+                border border-gray-300
+                ${apply(
+            false,
+            "text-gray-400 cursor-not-allowed",
+            "hover:bg-gray-400 hover:text-gray-700"
+        )}
+            `}
+        >
+            <span className="pr-1">{text("SHARE")}</span>
+            <FontAwesomeIcon icon={faShare} className="rounded-none" />
+        </button>
     );
 }
 
@@ -495,7 +524,8 @@ function CollectionInit({
                     <SearchButton />
                     <DatePicker date={null} setDate={onDatePick} />
                 </div>
-                <div className="flex shrink justify-end px-2">
+                <div className="flex gap-2 items-center shrink justify-end px-2">
+                    <Share />
                     <button className="border p-2" onClick={onToggleClick}>
                         {
                             <FontAwesomeIcon
@@ -584,8 +614,11 @@ export default function Collection() {
             const { type, payload, acknowledge: cAck } = lastMessage;
             if (acknowledge.current === cAck) {
                 if (type === "DOC.READ.OK") {
-                    const { text } = payload;
-                    dispatch(initDocument(text));
+                    const { text, visibility } = payload;
+                    dispatch(initDocument({
+                        text,
+                        visibility: visibility === 2 ? "write" : "read",
+                    }));
                 } else {
                     showMessage({
                         message: text("ERROR_GENERIC"),
