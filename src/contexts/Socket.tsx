@@ -4,8 +4,10 @@ import React, {
     useContext,
     useEffect,
     useMemo,
+    useRef,
     useState,
 } from "react";
+import luid from "../utils/luid";
 
 interface SocketMessage<T = any> {
   type: string;
@@ -146,9 +148,10 @@ const enum SocketStatus {
 interface ISocketContext {
   connect: (url: string) => void;
   disconnect: () => void;
-  emitter: EventEmitter
+  emitter: EventEmitter;
   status: SocketStatus;
   send: (type: string, payload: unknown, acknowledge?: string) => void;
+  sendCb: (type: string, payload: unknown, cb: SocketCb) => void;
 }
 
 const SocketContext = createContext<ISocketContext | undefined>(undefined);
@@ -161,10 +164,13 @@ function useSocket() {
     return socket;
 }
 
+type SocketCb = (err: null | Error, data: SocketMessage) => void;
+
 function SocketProvider({ children }: { children: React.ReactNode }) {
     const socket = useMemo(() => Socket.getInstance(), []);
     const [status, setStatus] = useState<SocketStatus>(SocketStatus.DISCONNECTED);
-    const emitter = useMemo(()=> new EventEmitter(), [])
+    const emitter = useMemo(() => new EventEmitter(), []);
+    const ackCallbacks = useRef(new Map<string, SocketCb>());
 
     useEffect(() => {
         const onOpen = (event: Event) => {
@@ -180,7 +186,15 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
             const data = (event as any).data;
             const newMsg = JSON.parse(data) as SocketMessage;
             console.log("onMessage", event);
-            emitter.emit('message', newMsg);
+            const { acknowledge } = newMsg;
+            if (acknowledge) {
+                const cb = ackCallbacks.current.get(acknowledge);
+                if (cb) {
+                    ackCallbacks.current.delete(acknowledge);
+                    cb(null, newMsg);
+                }
+            }
+            emitter.emit("message", newMsg);
         };
 
         const onError = (event: Event) => {
@@ -209,6 +223,11 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
                 setStatus(SocketStatus.DISCONNECTED);
             },
             send: (type: string, payload: unknown, acknowledge?: string) => {
+                socket.send(type, payload, acknowledge);
+            },
+            sendCb: (type: string, payload: unknown, cb: SocketCb) => {
+                const acknowledge = luid();
+                ackCallbacks.current.set(acknowledge, cb);
                 socket.send(type, payload, acknowledge);
             },
             status,

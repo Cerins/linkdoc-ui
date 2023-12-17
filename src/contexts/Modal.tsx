@@ -28,6 +28,20 @@ export default function useModalContext() {
     return context;
 }
 
+export function ModalLike({
+    children
+}: {
+    children: ReactNode;
+}) {
+    return (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex justify-center items-center">
+            <div className="bg-white p-8 rounded-lg shadow-lg">
+                {children}
+            </div>
+        </div>
+    )
+}
+
 export const ModalProvider: React.FC<{ children: ReactNode }> = ({
     children,
 }) => {
@@ -55,26 +69,24 @@ export const ModalProvider: React.FC<{ children: ReactNode }> = ({
         <ModalContext.Provider value={{ showMessage }}>
             {children}
             {currentMessage && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex justify-center items-center">
-                    <div className="bg-white p-8 rounded-lg shadow-lg">
-                        <p>{currentMessage.message}</p>
-                        <div className="flex justify-end mt-8 gap-2">
-                            {currentMessage.buttons.map((btn) => {
-                                return (
-                                    <button
-                                        onClick={() => {
-                                            handleClick();
-                                            btn.callback();
-                                        }}
-                                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                                    >
-                                        {btn.name}
-                                    </button>
-                                );
-                            })}
-                        </div>
+                <ModalLike>
+                    <p>{currentMessage.message}</p>
+                    <div className="flex justify-end mt-8 gap-2">
+                        {currentMessage.buttons.map((btn) => {
+                            return (
+                                <button
+                                    onClick={() => {
+                                        handleClick();
+                                        btn.callback();
+                                    }}
+                                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                                >
+                                    {btn.name}
+                                </button>
+                            );
+                        })}
                     </div>
-                </div>
+                </ModalLike>
             )}
         </ModalContext.Provider>
     );

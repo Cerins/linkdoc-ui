@@ -27,6 +27,9 @@ type TextCode =
   | "LOGOUT"
   | "REMEMBER_ME"
   | "SHARE"
+  | "READ_ONLY"
+  | "WRITE"
+  | "PRIVATE"
 
 type Locale = "lv" | "en";
 
@@ -79,7 +82,10 @@ const dictionary: Record<Locale, Record<TextCode, string>> = {
         LOGIN: 'Pieslēgties',
         LOGOUT: 'Iziet',
         REMEMBER_ME: 'Atcerēties pieslēgšanos',
-        SHARE: "Koplietot"
+        SHARE: "Koplietot",
+        READ_ONLY: "Tikai lasīt",
+        WRITE: "Rakstīt",
+        PRIVATE: "Privāts"
     },
     en: {
         NAME_MIN: 'Name too short',
@@ -106,7 +112,10 @@ const dictionary: Record<Locale, Record<TextCode, string>> = {
         LOGIN: 'Login',
         LOGOUT: 'Logout',
         REMEMBER_ME: 'Remember login',
-        SHARE: "Share"
+        SHARE: "Share",
+        READ_ONLY: "Read only",
+        WRITE: "Write",
+        PRIVATE: "Private"
     },
 };
 
