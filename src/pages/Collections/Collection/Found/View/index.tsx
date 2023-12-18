@@ -1,10 +1,11 @@
 import { Dispatch, useEffect, useMemo, useRef, useState } from "react";
-import { CollectionAction, CollectionState } from "../../reducer";
+import { CollectionAction, CollectionState, transformText } from "../../reducer";
 import { Mode } from "../../utils";
 import { Layout, Header } from "../../../../../components/Header";
 import SubHeader from "../SubHeader";
 import Editor from "./Editor";
 import Viewer from "./Viewer";
+import useSocket, { SocketMessage } from "../../../../../contexts/Socket";
 
 export default function CollectionFound({
     state,
@@ -14,6 +15,8 @@ export default function CollectionFound({
   dispatch: Dispatch<CollectionAction>;
 }) {
     const [mode, setMode] = useState<Mode>(Mode.BOTH);
+    const { emitter} = useSocket();
+    const acknowledges = useRef(new Set<string>());
     const showEditor = useMemo(
         () => (mode & Mode.EDITOR) === Mode.EDITOR && state.visibility === "write",
         [mode, state.visibility]
@@ -46,6 +49,29 @@ export default function CollectionFound({
             removeEventListener("mousemove", fn);
         };
     }, []);
+    useEffect(() => {
+        const listener = (lastMessage: SocketMessage) => {
+            if (lastMessage === null) return;
+            if (
+                lastMessage.acknowledge &&
+        acknowledges.current.has(lastMessage.acknowledge)
+            ) {
+                acknowledges.current.delete(lastMessage.acknowledge);
+                return;
+            }
+            if (
+                lastMessage.type === "DOC.WRITE.OK" ||
+                lastMessage.type === "DOC.ERASE.OK"
+            ) {
+                const transform = lastMessage.payload.transform;
+                dispatch(transformText(transform));
+            }
+        };
+        emitter.addListener("message", listener);
+        return () => {
+            emitter.removeListener("message", listener);
+        };
+    }, []);
     return (
         <Layout header={<Header />}>
             <SubHeader showEditor={showEditor} showRead={showRead} setMode={setMode} />
@@ -56,6 +82,7 @@ export default function CollectionFound({
                         panelWidth={panelWidth}
                         state={state}
                         dispatch={dispatch}
+                        acknowledges={acknowledges}
                     />
                 )}
                 {showEditor && showRead && (
