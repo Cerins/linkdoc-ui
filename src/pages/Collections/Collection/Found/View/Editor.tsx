@@ -1,13 +1,13 @@
 import CodeMirror from "@uiw/react-codemirror";
 import { markdown } from "@codemirror/lang-markdown";
-import useSocket, { SocketMessage } from "../../../../../contexts/Socket";
-import { Dispatch, useCallback, useEffect, useRef } from "react";
+import useSocket from "../../../../../contexts/Socket";
+import { Dispatch, useCallback } from "react";
 import { difference, sid } from "../../utils";
 import luid from "../../../../../utils/luid";
 import { useSelector } from "react-redux";
 import { IState } from "../../../../../store";
 import { useParams } from "react-router-dom";
-import { CollectionAction, setText, transformText } from "../../reducer";
+import { CollectionAction, setText } from "../../reducer";
 
 export default function Editor({
     showRead,
