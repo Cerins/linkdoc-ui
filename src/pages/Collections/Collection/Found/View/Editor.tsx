@@ -14,6 +14,7 @@ export default function Editor({
     panelWidth,
     state,
     dispatch,
+    acknowledges,
 }: {
     showRead: boolean;
     panelWidth: number;
@@ -21,11 +22,11 @@ export default function Editor({
         text: string;
     };
     dispatch: Dispatch<CollectionAction>;
+    acknowledges: React.MutableRefObject<Set<string>>;
 }) {
-    const { emitter, send } = useSocket();
+    const { send } = useSocket();
     const username = useSelector((root: IState) => root.login.username);
     const { docName, uuid: colUUID } = useParams();
-    const acknowledges = useRef(new Set<string>());
     const onChange = useCallback(
         (val: string) => {
             const diff = difference(state.text, val);
@@ -67,29 +68,6 @@ export default function Editor({
         },
         [docName, colUUID, state.text]
     );
-    useEffect(() => {
-        const listener = (lastMessage: SocketMessage) => {
-            if (lastMessage === null) return;
-            if (
-                lastMessage.acknowledge &&
-        acknowledges.current.has(lastMessage.acknowledge)
-            ) {
-                acknowledges.current.delete(lastMessage.acknowledge);
-                return;
-            }
-            if (
-                lastMessage.type === "DOC.WRITE.OK" ||
-                lastMessage.type === "DOC.ERASE.OK"
-            ) {
-                const transform = lastMessage.payload.transform;
-                dispatch(transformText(transform));
-            }
-        };
-        emitter.addListener("message", listener);
-        return () => {
-            emitter.removeListener("message", listener);
-        };
-    }, []);
     return (
         <div
             className="panel"
