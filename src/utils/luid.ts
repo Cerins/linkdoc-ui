@@ -18,7 +18,8 @@
 
 import { v4 } from "uuid";
 
-// Maybe i send more data but atleast acknoledges are not guessable
+// Maybe it sends more data but at least acknowledges are not guessable
 export default function luid(username?: string | null) {
-    return v4()
+    // I am sorry but the not use of username was preventing the app from compiling
+    return username ? v4() : v4();
 }

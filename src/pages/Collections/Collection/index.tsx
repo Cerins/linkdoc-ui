@@ -8,8 +8,6 @@ import { IState } from "../../../store";
 import { useSelector } from "react-redux";
 import luid from "../../../utils/luid";
 import { useParams } from "react-router-dom";
-import useModalContext from "../../../contexts/Modal";
-import useTextContext from "../../../contexts/Text";
 import "./index.css";
 import CollectionFresh from "./Fresh";
 import CollectionNotFound from "./NotFound";
@@ -23,8 +21,6 @@ export default function Collection() {
     const acknowledge = useRef<string>("");
     const username = useSelector((root: IState) => root.login.username);
     const { docName, uuid: colUUID } = useParams();
-    const { showMessage } = useModalContext();
-    const { text } = useTextContext();
     useEffect(() => {
         dispatch(setState(initialState));
         acknowledge.current = luid(username);

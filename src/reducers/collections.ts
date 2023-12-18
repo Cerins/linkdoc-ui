@@ -9,6 +9,7 @@ interface CollectionState {
     name: string;
     time: string;
     user: string;
+    defaultDocument: string | null;
   }[];
   acknowledge?: string;
   createActive: boolean
@@ -52,6 +53,7 @@ const collectionsSlice = createSlice({
             name: string,
             user: string
             time: string
+            defaultDocument: string | null
         } | undefined>) {
             if(action.payload !== undefined) {
                 state.collections = [...state.collections, action.payload]
