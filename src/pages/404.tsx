@@ -1,5 +1,12 @@
+import NonExistentPage from "../components/404";
+import { Header, Layout } from "../components/Header";
+
 export default function NotFound() {
-    return <p>
-        Not found
-    </p>
+    return (
+        <Layout
+            header={<Header />}
+        >
+            <NonExistentPage />
+        </Layout>
+    )
 }

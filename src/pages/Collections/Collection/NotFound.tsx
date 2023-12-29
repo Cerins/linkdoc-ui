@@ -1,3 +1,4 @@
+import NonExistentPage from "../../../components/404";
 import { Header, Layout } from "../../../components/Header";
 
 export default function CollectionNotFound() {
@@ -5,7 +6,7 @@ export default function CollectionNotFound() {
         <Layout
             header={<Header />}
         >
-            <p>404</p>
+            <NonExistentPage />
         </Layout>
     )
 }

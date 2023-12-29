@@ -47,7 +47,7 @@ function DeleteButton({
     disabled,
     setDisabled,
 }: {
-  collection: { uuid: string };
+  collection: { uuid: string, user: string };
   disabled: boolean;
   setDisabled: (disabled: boolean) => void;
 }) {
@@ -117,7 +117,7 @@ function DeleteButton({
             onClick={handleDelete}
             className={`
             invisible
-            group-hover:visible
+            ${apply(username === collection.user, "group-hover:visible")}
             text-white
             font-bold
             px-2

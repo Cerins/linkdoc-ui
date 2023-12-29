@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useTextContext from "../../../../contexts/Text";
 import { apply } from "../../../../utils/css";
-import { faClose, faCopy, faShare } from "@fortawesome/free-solid-svg-icons";
+import { faClose, faCopy, faEye, faPen, faShare } from "@fortawesome/free-solid-svg-icons";
 import { useEffect,  useState } from "react";
 import { ModalLike } from "../../../../contexts/Modal";
 import useSocket from "../../../../contexts/Socket";
@@ -9,6 +9,8 @@ import { useParams } from "react-router-dom";
 import Spinner from "../../../../components/Spinner";
 import collectionURL from "../../../../utils/collections/url";
 import standardDate from "../../../../utils/date/stamdard";
+import { useSelector } from "react-redux";
+import { IState } from "../../../../store";
 
 type PopupState = {
     status: "ok";
@@ -20,6 +22,10 @@ type PopupState = {
     owner: boolean;
     defaultDocument: string | null
     visibility: 0 | 1 | 2
+    users: {
+        name: string;
+        visibility: 0 | 1 | 2
+    }[]
 } | {
     status: "error";
     error: string;
@@ -37,6 +43,7 @@ function Popup(
     const  { sendCb }  = useSocket();
     const { uuid: colUUID } = useParams();
     const { text } = useTextContext();
+    const activeUser = useSelector((state: IState) => state.login.username);
     
     useEffect(()=>{
         if(state === null){
@@ -56,7 +63,8 @@ function Popup(
                         status: "ok",
                         owner: data.payload.owner,
                         defaultDocument: data.payload.defaultDocument,
-                        visibility: data.payload.visibility
+                        visibility: data.payload.visibility,
+                        users: data.payload.users
                     });
                 })
         }
@@ -100,8 +108,8 @@ function Popup(
             if(state.owner === false) {
                 return <ShareDoc />
             }
-            return (
-                <div className="w-full">
+            const ChangeVisibility = () => {
+                return (
                     <div className="border w-full">
                         <select
                             value={state.visibility}
@@ -140,11 +148,188 @@ function Popup(
                             <option value={2}>{text("WRITE")}</option>
                         </select>
                     </div>
-                    {
-                        state.visibility > 0 && (
+                )
+            }
+            const UserList = () => {
+                if(state.users === undefined) return <></>
+                if(state.users.filter((usr)=>usr.visibility > 0).length === 0) return <></>
+                return (
+                    <div className="mt-2">
+                        <h2>{text("SHARE_USERS")}</h2>
+                        <div className="border w-full">
+                            <ul>
+                                {
+                                    state.users
+                                        .filter((usr) => usr.visibility > 0)
+                                        .map((user, index) => (
+                                            <li key={index} className="flex justify-between items-center">
+                                                <span>{user.name}</span>
+                                                {user.visibility === 1 && <FontAwesomeIcon icon={faEye} />}
+                                                {user.visibility === 2 && <FontAwesomeIcon icon={faPen} />}
+                                                <button
+                                                    onClick={() => {
+                                                        const updatedUsers = state.users.map((usr) => {
+                                                            if (usr.name === user.name) {
+                                                                return { ...usr, visibility: 0 };
+                                                            }
+                                                            return usr;
+                                                        });
+                                                        setState((prevState) => ({
+                                                            ...prevState,
+                                                            users: updatedUsers,
+                                                        }) as any);
+                                                        sendCb(
+                                                            'COL.SHARE',
+                                                            {
+                                                                colUUID,
+                                                                users: [
+                                                                    {
+                                                                        name: user.name,
+                                                                        role: 0
+                                                                    }
+                                                                ]
+                                                            },
+                                                            // (err, data) => {
+                                                            // TODO
+                                                            // if(err){
+                                                            //     setState({
+                                                            //         status: "error",
+                                                            //         error: err.message
+                                                            //     })
+                                                            // }
+                                                            // if(data.type !== "COL.SHARE.OK"){
+                                                            //     setState({
+                                                            //         status: "error",
+                                                            //         error: "Unknown error"
+                                                            //     })
+                                                            // }
+                                                            // }
+                                                            ()=>{}
+                                                        )
+                                                    }}
+                                                    className="text-red-500"
+                                                >
+                                                    {text("SHARE_REMOVE")}
+                                                </button>
+                                            </li>
+                                        ))
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                )
+            }
+            const AddUser = () => {
+                const [active, setActive] = useState(true);
+                const [username, setUsername] = useState("");
+                const [permission, setPermission] = useState(1);
+                return (
+                    <div className="mt-2">
+                        <h2>{text("SHARE_ADD_USER")}</h2>
+                        <div className="border w-full">
+                            <input
+                                disabled={!active}
+                                type="text"
+                                placeholder={text("LOGIN_USERNAME")}
+                                className="p-2 text-black-700 overflow-scroll w-full"
+                                value={username}
+                                onChange={(e) => {
+                                    setUsername(e.target.value);
+                                }}
+                            />
+                        </div>
+                        {/* Selection of permission */}
 
-                            <ShareDoc />
-                        )}
+                        <div className="flex">
+                            <div className="w-1/2">
+                                <div className="border w-full">
+                                    <select
+                                        disabled={!active}
+                                        value={permission}
+                                        onChange={(e) => {
+                                            const selectedPermission = parseInt(e.target.value);
+                                            setPermission(selectedPermission);
+                                        }}
+                                        className="p-2 text-black-700 overflow-scroll w-full"
+                                    >
+                                        <option value={1}>{text("READ_ONLY")}</option>
+                                        <option value={2}>{text("WRITE")}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="w-1/2">
+                                <button className="w-full border hover:bg-gray-400 hover:text-gray-700 h-full disabled:opacity-50"
+                                    disabled={!active}
+                                    onClick={()=>{
+                                        // console.log(activeUser)
+                                        setActive(false);
+                                        if(username === activeUser) {
+                                            setPermission(1);
+                                            setUsername("");
+                                            setActive(true);
+                                            return;
+                                        }
+                                        sendCb(
+                                            'COL.SHARE',
+                                            {
+                                                colUUID,
+                                                users: [
+                                                    {
+                                                        name: username,
+                                                        role: permission
+                                                    }
+                                                ]
+                                            },
+                                            (err, data) => {
+                                                if(err){
+                                                    // setState({
+                                                    //     status: "error",
+                                                    //     error: err.message
+                                                    // })
+                                                    setUsername("");
+                                                    setPermission(1);
+                                                    setActive(true);
+
+                                                    return
+                                                }
+                                                if(data.type !== "COL.SHARE.OK"){
+                                                    // setState({
+                                                    //     status: "error",
+                                                    //     error: "Unknown error"
+                                                    // })
+                                                    setUsername("");
+                                                    setPermission(1);
+                                                    setActive(true);
+                                                    return
+                                                }
+                                                setState((prevState) => ({
+                                                    ...prevState,
+                                                    users: [
+                                                        ...((prevState as any)?.users ?? []).filter((user: any) => user.name !== username),
+                                                        {
+                                                            name: username,
+                                                            visibility: permission
+                                                        }
+                                                    ]
+                                                } as any))
+                                            }
+                                        )
+
+                                    }}
+                                >
+                                    {text("SHARE_ADD_USER")}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+            return (
+                <div className="w-full">
+                    <ChangeVisibility />
+                    <UserList />
+                    <AddUser />
+                    <ShareDoc />
                 </div>
             )
 
@@ -159,7 +344,7 @@ function Popup(
             </div>
             <h2 className="py-2 text-xl font-bold">{text("SHARE")}</h2>
             <div className="py-2 flex justify-center items-center w-72">
-                    {ModalInner()}
+                {ModalInner()}
             </div>
         </ModalLike>
     )

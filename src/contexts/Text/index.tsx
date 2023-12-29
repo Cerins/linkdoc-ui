@@ -27,6 +27,10 @@ type TextCode =
   | "LOGOUT"
   | "REMEMBER_ME"
   | "SHARE"
+  | "SHARE_ADD_USER"
+  | "SHARE_USERS"
+  | "SHARE_REMOVE"
+  | "404"
   | "READ_ONLY"
   | "WRITE"
   | "PRIVATE"
@@ -82,7 +86,11 @@ const dictionary: Record<Locale, Record<TextCode, string>> = {
         LOGIN: 'Pieslēgties',
         LOGOUT: 'Iziet',
         REMEMBER_ME: 'Atcerēties pieslēgšanos',
-        SHARE: "Koplietot",
+        SHARE: "Kopīgot",
+        SHARE_ADD_USER: "Pievienot lietotāju",
+        SHARE_REMOVE: "Noņemt",
+        "404": "Lapa netika atrasta! Pārliecināties, ka jums ir piekļuve šim resursam.",
+        SHARE_USERS: "Lietotāji",
         READ_ONLY: "Tikai lasīt",
         WRITE: "Rakstīt",
         PRIVATE: "Privāts"
@@ -113,6 +121,10 @@ const dictionary: Record<Locale, Record<TextCode, string>> = {
         LOGOUT: 'Logout',
         REMEMBER_ME: 'Remember login',
         SHARE: "Share",
+        SHARE_ADD_USER: "Add user",
+        SHARE_USERS: "Users",
+        "404": "Page not found! Make sure you have access to this resource.",
+        SHARE_REMOVE: "Remove",
         READ_ONLY: "Read only",
         WRITE: "Write",
         PRIVATE: "Private"
