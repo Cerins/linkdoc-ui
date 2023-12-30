@@ -8,12 +8,14 @@ export interface CollectionState {
     | "system error";
   text: string;
   cursor: number;
+  sid: number;
   visibility: "read" | "write";
 }
 
 export function initDocument(document: {
     text: string,
-    visibility: "read" | "write"
+    visibility: "read" | "write",
+    sid: number
 }) {
     return {
         type: "INIT_DOCUMENT",
@@ -83,13 +85,21 @@ export function setCursor(cursor: number) {
     } as const;
 }
 
+export function setSid(sid: number) {
+    return {
+        type: "SET_SID",
+        payload: sid,
+    } as const;
+}
+
 export type CollectionAction =
   | ReturnType<typeof initDocument>
   | ReturnType<typeof setText>
   | ReturnType<typeof failedLoad>
   | ReturnType<typeof setState>
   | ReturnType<typeof transformText>
-  | ReturnType<typeof setCursor>;
+  | ReturnType<typeof setCursor>
+  | ReturnType<typeof setSid>;
 
 export default function collectionReducer(
     state: CollectionState,
@@ -102,6 +112,7 @@ export default function collectionReducer(
             text: action.payload.text,
             visibility: action.payload.visibility,
             cursor: 0,
+            sid: action.payload.sid,
         };
     }
     case "TRANSFORM_TEXT": {
@@ -157,6 +168,12 @@ export default function collectionReducer(
             cursor: action.payload,
         };
     }
+    case "SET_SID": {
+        return {
+            ...state,
+            sid: action.payload,
+        };
+    }
     default:
         throw new Error("Unknown collection type");
     }
@@ -166,5 +183,6 @@ export const initialState: CollectionState = {
     status: "fresh",
     text: "",
     visibility: "read",
-    cursor: 0
+    cursor: 0,
+    sid: 0,
 };

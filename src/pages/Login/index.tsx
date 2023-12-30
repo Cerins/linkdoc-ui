@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import useTextService, { TextCode } from "../../contexts/Text";
 import { apply } from "../../utils/css";
 import { getLoginToken, loginThroughSession } from "../../services/login";
@@ -9,6 +9,7 @@ import { Header, Layout } from "../../components/Header";
 import { useDispatch } from "react-redux";
 import { setUsername } from "../../reducers/login";
 import Spinner from "../../components/Spinner";
+import TermsList, { TermsListHandles } from "../../components/Accept";
 
 function TextInput({
     label,
@@ -56,11 +57,13 @@ function LoginForm() {
     const [error, setError] = useState<TextCode | null>(null);
     const [disabled, setDisabled] = useState(false);
     const [tryCookie, setTryCookie] = useState(true);
-    const [remember, setRemember] = useState(true);
+    // const [remember, setRemember] = useState(true);
+    const remember = true;
     const currentLocation = (useLocation() as { state?: {from?: To}});
     const { connect, status } = useSocket();
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const termList = useRef<TermsListHandles>(null);
     useEffect(() => {
         if (disabled && status === SocketStatus.ERROR) {
             setError("ERROR_GENERIC");
@@ -80,8 +83,14 @@ function LoginForm() {
     }
 
     async function onSubmit(e: FormEvent) {
-        setDisabled(true);
         e.preventDefault();
+        const accepted = termList.current?.accepted() ?? false;
+        console.log(accepted);
+        if (!accepted) {
+            setError("LOGIN_NOT_ACCEPTED");
+            return;
+        }
+        setDisabled(true);
         try {
             setError(null);
             const token = await getLoginToken(name, password, remember);
@@ -139,7 +148,7 @@ function LoginForm() {
                 disabled={disabled}
             />
             <div className="flex justify-center items-center">
-                <label className="inline-flex items-center">
+                {/* <label className="inline-flex items-center">
                     <input
                         type="checkbox"
                         className="form-checkbox h-5 w-5 text-blue-600"
@@ -147,7 +156,10 @@ function LoginForm() {
                         onChange={(e)=>setRemember(e.target.checked)}
                     />
                     <span className="ml-2 text-gray-600">{text("REMEMBER_ME")}</span>
-                </label>
+                </label> */}
+                <TermsList 
+                    ref={termList}
+                />
             </div>
 
             <p

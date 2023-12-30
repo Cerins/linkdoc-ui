@@ -40,10 +40,11 @@ export default function Collection() {
             const { type, payload, acknowledge: cAck } = lastMessage;
             if (acknowledge.current === cAck) {
                 if (type === "DOC.READ.OK") {
-                    const { text, visibility } = payload;
+                    const { text, visibility, sid } = payload;
                     dispatch(initDocument({
                         text,
                         visibility: visibility === 2 ? "write" : "read",
+                        sid,
                     }));
                 } else {
                     // showMessage({

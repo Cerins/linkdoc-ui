@@ -1,6 +1,6 @@
-export function sid() {
-    return new Date().getTime();
-}
+// export function sid() {
+//     return new Date().getTime();
+// }
 
 export function difference(lstStr: string, nwStr: string) {
     // Use two pointers

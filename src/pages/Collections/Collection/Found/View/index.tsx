@@ -1,5 +1,5 @@
 import { Dispatch, useEffect, useMemo, useRef, useState } from "react";
-import { CollectionAction, CollectionState, transformText } from "../../reducer";
+import { CollectionAction, CollectionState, setSid, transformText } from "../../reducer";
 import { Mode } from "../../utils";
 import { Layout, Header } from "../../../../../components/Header";
 import SubHeader from "../SubHeader";
@@ -52,6 +52,8 @@ export default function CollectionFound({
     useEffect(() => {
         const listener = (lastMessage: SocketMessage) => {
             if (lastMessage === null) return;
+            const sid = lastMessage.payload.sid;
+            dispatch(setSid(sid));
             if (
                 lastMessage.acknowledge &&
         acknowledges.current.has(lastMessage.acknowledge)
