@@ -64,7 +64,7 @@ export default function Editor({
 
 
         const editorAdapter = new CodeMirrorAdapter(cm);
-        const client = new EditorClient(state.sid, {}, serverAdapter, editorAdapter);
+        const _ = new EditorClient(state.sid, {}, serverAdapter, editorAdapter);
         return () => {
             // Clean up the code mirror instance
             cm.off('change', listener);
