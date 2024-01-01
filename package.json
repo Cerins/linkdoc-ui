@@ -15,7 +15,6 @@
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@reduxjs/toolkit": "^1.9.7",
-    "@uiw/react-codemirror": "^4.21.21",
     "codemirror": "^5.65.16",
     "date-fns": "^2.30.0",
     "events": "^3.3.0",
@@ -29,6 +28,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@types/codemirror": "^5.60.15",
     "@types/events": "^3.0.3",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",

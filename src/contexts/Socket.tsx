@@ -21,6 +21,10 @@ type Event = unknown;
 
 type EventListener<Target> = (this: Target, event: Event) => void;
 
+type ISend = (type: string, payload: unknown, acknowledge?: string) => void;
+
+type IEmitter = EventEmitter;
+
 interface ISocket {
   addEventListener: (
     type: EventListerType,
@@ -31,7 +35,7 @@ interface ISocket {
     listener: EventListener<ISocket>
   ) => void;
   disconnect: () => void;
-  send: (type: string, payload: unknown, acknowledge?: string) => void;
+  send: ISend;
 }
 
 class Socket implements ISocket {
@@ -243,3 +247,4 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
 export default useSocket;
 export { SocketProvider, SocketStatus };
 export type { SocketMessage };
+export type { IEmitter, ISend };

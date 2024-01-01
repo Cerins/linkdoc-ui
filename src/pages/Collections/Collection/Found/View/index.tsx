@@ -53,13 +53,12 @@ export default function CollectionFound({
         const listener = (lastMessage: SocketMessage) => {
             if (lastMessage === null) return;
             const sid = lastMessage.payload.sid;
-            dispatch(setSid(sid));
             if (
                 lastMessage.acknowledge &&
         acknowledges.current.has(lastMessage.acknowledge)
             ) {
                 acknowledges.current.delete(lastMessage.acknowledge);
-                return;
+                // return;
             }
             if (
                 lastMessage.type === "DOC.WRITE.OK" ||
@@ -67,6 +66,9 @@ export default function CollectionFound({
             ) {
                 const transform = lastMessage.payload.transform;
                 dispatch(transformText(transform));
+            }
+            if(sid !== undefined) {
+                dispatch(setSid(sid));
             }
         };
         emitter.addListener("message", listener);
@@ -78,15 +80,14 @@ export default function CollectionFound({
         <Layout header={<Header />}>
             <SubHeader showEditor={showEditor} showRead={showRead} setMode={setMode} />
             <div className="split-view">
-                {showEditor && (
-                    <Editor
-                        showRead={showRead}
-                        panelWidth={panelWidth}
-                        state={state}
-                        dispatch={dispatch}
-                        acknowledges={acknowledges}
-                    />
-                )}
+                <Editor
+                    showRead={showRead}
+                    panelWidth={panelWidth}
+                    state={state}
+                    dispatch={dispatch}
+                    acknowledges={acknowledges}
+                    display={showEditor}
+                />
                 {showEditor && showRead && (
                     <div
                         className="resizer"

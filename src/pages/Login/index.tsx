@@ -85,7 +85,6 @@ function LoginForm() {
     async function onSubmit(e: FormEvent) {
         e.preventDefault();
         const accepted = termList.current?.accepted() ?? false;
-        console.log(accepted);
         if (!accepted) {
             setError("LOGIN_NOT_ACCEPTED");
             return;
