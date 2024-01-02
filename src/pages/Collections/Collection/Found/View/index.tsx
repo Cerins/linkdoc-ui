@@ -17,6 +17,7 @@ export default function CollectionFound({
     const [mode, setMode] = useState<Mode>(Mode.BOTH);
     const { emitter} = useSocket();
     const acknowledges = useRef(new Set<string>());
+    const cmRef = useRef<CodeMirror.Editor | undefined>(undefined);
     const showEditor = useMemo(
         () => (mode & Mode.EDITOR) === Mode.EDITOR && state.visibility === "write",
         [mode, state.visibility]
@@ -78,9 +79,15 @@ export default function CollectionFound({
     }, []);
     return (
         <Layout header={<Header />}>
-            <SubHeader showEditor={showEditor} showRead={showRead} setMode={setMode} />
+            <SubHeader 
+                showEditor={showEditor}
+                showRead={showRead}
+                setMode={setMode}
+                cmRef={cmRef}
+            />
             <div className="split-view">
                 <Editor
+                    cmRef={cmRef}
                     showRead={showRead}
                     panelWidth={panelWidth}
                     state={state}

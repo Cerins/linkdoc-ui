@@ -82,5 +82,6 @@ async function logout() {
 export {
     getLoginToken,
     loginThroughSession,
-    logout
+    logout,
+    fetchCSRFToken
 }

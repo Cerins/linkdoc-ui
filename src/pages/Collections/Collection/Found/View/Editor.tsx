@@ -14,7 +14,8 @@ export default function Editor({
     state,
     dispatch,
     // acknowledges,
-    display
+    display,
+    cmRef
 }: {
     showRead: boolean;
     panelWidth: number;
@@ -26,10 +27,10 @@ export default function Editor({
     dispatch: Dispatch<CollectionAction>;
     acknowledges: React.MutableRefObject<Set<string>>;
     display: boolean
+    cmRef: React.MutableRefObject<CodeMirror.Editor | undefined>
 }) {
     const { send, emitter } = useSocket();
     const { docName, uuid: colUUID } = useParams();
-    const cmRef = useRef<CodeMirror.Editor>();
     useEffect(()=>{
         const cm = CodeMirror.fromTextArea(document.getElementById('note') as HTMLTextAreaElement, {
             lineNumbers: true,

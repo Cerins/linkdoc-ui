@@ -43,7 +43,7 @@ const TermsList = forwardRef<TermsListHandles, unknown>((_, ref) => {
                         />
                         {/* Label should look like a link */}
                         <label
-                            className="text-blue-500 cursor-pointer hover:text-blue-700"
+                            className="mx-2 text-blue-500 cursor-pointer hover:text-blue-700"
                             onClick={() => showMessage({
                                 message: long,
                                 buttons: [

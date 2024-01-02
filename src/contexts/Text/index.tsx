@@ -35,6 +35,7 @@ type TextCode =
   | "READ_ONLY"
   | "WRITE"
   | "PRIVATE"
+  | "FILE_TOO_LARGE";
 
 type Locale = "lv" | "en";
 
@@ -95,7 +96,8 @@ const dictionary: Record<Locale, Record<TextCode, string>> = {
         SHARE_USERS: "Lietotāji",
         READ_ONLY: "Tikai lasīt",
         WRITE: "Rakstīt",
-        PRIVATE: "Privāts"
+        PRIVATE: "Privāts",
+        FILE_TOO_LARGE: "Fails nedrīkst būt lielāks 10MB",
     },
     en: {
         NAME_MIN: 'Name too short',
@@ -130,7 +132,8 @@ const dictionary: Record<Locale, Record<TextCode, string>> = {
         SHARE_REMOVE: "Remove",
         READ_ONLY: "Read only",
         WRITE: "Write",
-        PRIVATE: "Private"
+        PRIVATE: "Private",
+        FILE_TOO_LARGE: "File must not be larger than 10MB",
     },
 };
 

@@ -1,6 +1,7 @@
 import Markdown from "react-markdown";
 import { Link, useParams } from "react-router-dom";
 import collectionURL from "../../../../../utils/collections/url";
+import config from "../../../../../services/config";
 
 export default function Viewer({
     state,
@@ -19,8 +20,30 @@ export default function Viewer({
             return `[${content}](${customUrl})`;
         });
     };
+    const UseImage = ( { alt, src }: any) => {
+        // If start with /file, then it's a file
+        if(src.startsWith('/file')) {
+            const fullUrl = `${config.apiURL}${src}`;
+            return (
+                <img alt={alt} src={fullUrl} />
+            )
+        }
+        // Otherwise do nothing
+        return (
+            <img alt={alt} src={src} />
+        )
+    }
     const UseLink = ({ children, href }: any) => {
     // Check if the href should be handled by React Router
+        if(href.startsWith('/file')) {
+            const fullUrl = `${config.apiURL}${href}`;
+            // Return a regular <a> tag if it's a file
+            return (
+                <a href={fullUrl} target="_blank">
+                    {children}
+                </a>
+            )
+        }
         if (href.startsWith("/")) {
             return <Link to={href}>{children}</Link>;
         }
@@ -42,6 +65,7 @@ export default function Viewer({
             <Markdown
                 components={{
                     a: UseLink,
+                    img: UseImage,
                 }}
                 className={"markdown"}
             >
