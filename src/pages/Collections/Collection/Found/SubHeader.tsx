@@ -114,7 +114,6 @@ export default function SubHeader({
                                         if(imgMimeType.includes(mimeType)) {
                                         // Insert image
                                             const img = `\n![${file.name}](/file/${uuid})`;
-                                            console.log(img, cmRef);
                                             // Place at the end of the document in code mirror
                                             cmRef.current?.replaceRange(img, { line: cmRef.current?.lastLine()! + 1, ch: 0 }, { line: cmRef.current?.lastLine()! + 1, ch: 0 })
                                             // Also scroll to the end of the document
@@ -123,7 +122,6 @@ export default function SubHeader({
                                         else {
                                         // Insert link
                                             const link = `\n[${file.name}](/file/${uuid})`;
-                                            console.log(link, cmRef);
                                             // Place at the end of the document in code mirror
                                             cmRef.current?.replaceRange(link, { line: cmRef.current?.lastLine()! + 1, ch: 0 }, { line: cmRef.current?.lastLine()! + 1, ch: 0 })
                                             // Also scroll to the end of the document

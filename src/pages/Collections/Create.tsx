@@ -47,7 +47,7 @@ export function CollectionCreate({
         let error: TextCode | "" = "";
         if (name === "") {
             error = "COLLECTIONS_CREATE_ERR_EMPTY";
-        } else if (collections.some((c) => c.name === name)) {
+        } else if (collections.some((c) => c.name === name && c.user === username)) {
             error = "COLLECTIONS_CREATE_ERR_EXISTS";
         }
         setError(error);
