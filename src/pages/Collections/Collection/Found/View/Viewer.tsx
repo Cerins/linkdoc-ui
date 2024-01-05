@@ -14,9 +14,9 @@ export default function Viewer({
     const processCustomLinks = (markdown: string) => {
         // TODO []([[]]) syntax
         // Have to allow custom [[]] syntax
-        return markdown.replace(/\[\[(.*?)\]\]/g, (_, content) => {
+        return markdown.replace(/(?<=(?:^|[^\\])(?:\\\\)*)\[\[([^\]]+?)\]\]/g, (_, content) => {
             // Create a custom URL or perform other logic based on 'content'
-            const customUrl = collectionURL(colUUID!, content);
+            const customUrl = collectionURL(colUUID!, encodeURIComponent(content));
             return `[${content}](${customUrl})`;
         });
     };

@@ -81,7 +81,7 @@ const dictionary: Record<Locale, Record<TextCode, string>> = {
         LOADING: "Lādejas",
         COLLECTIONS_NAME: "Nosaukums",
         COLLECTIONS_USER: "Izveidoja",
-        COLLECTIONS_TIME: "Pēdējā piekļušana",
+        COLLECTIONS_TIME: "Pēdējā piekļūšana",
         COLLECTIONS_CREATE_ERR_EMPTY: "Nosaukumu vajag ievadīt",
         COLLECTIONS_CREATE_ERR_EXISTS: "Kolekcija jau eksistē",
         COLLECTIONS_CREATE_PLACEHOLDER: "Kolekcijas nosaukums",
