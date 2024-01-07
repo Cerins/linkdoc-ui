@@ -16,7 +16,6 @@ function App() {
                     path="/"
                     element={
                         <PrivatePath>
-                            {/* <Debug /> */}
                             <Collections />
                         </PrivatePath>
                     }
@@ -29,7 +28,6 @@ function App() {
                         </PrivatePath>
                     }
                 />
-                {/* TODO actually this can continue to be private path, but i need to find a way to start a session without auth and with auth */ }
                 <Route
                     path="/collections/:uuid/:docName"
                     element={

@@ -189,21 +189,6 @@ function Popup(
                                                                     }
                                                                 ]
                                                             },
-                                                            // (err, data) => {
-                                                            // TODO
-                                                            // if(err){
-                                                            //     setState({
-                                                            //         status: "error",
-                                                            //         error: err.message
-                                                            //     })
-                                                            // }
-                                                            // if(data.type !== "COL.SHARE.OK"){
-                                                            //     setState({
-                                                            //         status: "error",
-                                                            //         error: "Unknown error"
-                                                            //     })
-                                                            // }
-                                                            // }
                                                             ()=>{}
                                                         )
                                                     }}
@@ -261,7 +246,6 @@ function Popup(
                                 <button className="w-full border hover:bg-gray-400 hover:text-gray-700 h-full disabled:opacity-50"
                                     disabled={!active}
                                     onClick={()=>{
-                                        // console.log(activeUser)
                                         setActive(false);
                                         if(username === activeUser) {
                                             setPermission(1);

@@ -22,7 +22,7 @@ export default function CollectionFound({
         () => (mode & Mode.EDITOR) === Mode.EDITOR && state.visibility === "write",
         [mode, state.visibility]
     );
-    const showRead = useMemo(() => (mode & Mode.READ) === Mode.READ || state.visibility !== "write", [mode]);
+    const showRead = useMemo(() => (mode & Mode.READ) === Mode.READ || state.visibility !== "write", [mode, state.visibility]);
     const [panelWidth, setPanelWidth] = useState(
         Math.floor(window.innerWidth / 2)
     ); // Initial panel width in percentage
@@ -39,15 +39,20 @@ export default function CollectionFound({
     };
 
     useEffect(() => {
-        const fn = (e: any) => {
+        const onMouseMove = (e: any) => {
             if (dragging.current) {
                 const newWith = e.clientX;
                 setPanelWidth(newWith);
             }
         };
-        addEventListener("mousemove", fn);
+        const onResize = () => {
+            setPanelWidth(Math.floor(window.innerWidth / 2));
+        }
+        addEventListener("mousemove", onMouseMove);
+        addEventListener("resize", onResize);
         return () => {
-            removeEventListener("mousemove", fn);
+            removeEventListener("mousemove", onMouseMove);
+            removeEventListener("resize", onResize);
         };
     }, []);
     useEffect(() => {
@@ -59,6 +64,7 @@ export default function CollectionFound({
         acknowledges.current.has(lastMessage.acknowledge)
             ) {
                 acknowledges.current.delete(lastMessage.acknowledge);
+                // Return not needed only because own messages are broadcasted
                 // return;
             }
             if (
@@ -104,6 +110,7 @@ export default function CollectionFound({
                 )}
                 {showRead && (
                     <Viewer 
+                        
                         state={state}
                     />
                 )}

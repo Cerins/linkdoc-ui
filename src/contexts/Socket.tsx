@@ -178,18 +178,18 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         const onOpen = (event: Event) => {
-            console.log("onOpen", event);
+            // console.log("onOpen", event);
             setStatus(SocketStatus.CONNECTED);
         };
         const onClose = (event: Event) => {
-            console.log("onClose", event);
+            // console.log("onClose", event);
             setStatus(SocketStatus.DISCONNECTED);
         };
         const onMessage = (event: Event) => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const data = (event as any).data;
             const newMsg = JSON.parse(data) as SocketMessage;
-            console.log("onMessage", event);
+            // console.log("onMessage", event);
             const { acknowledge } = newMsg;
             if (acknowledge) {
                 const cb = ackCallbacks.current.get(acknowledge);
@@ -202,7 +202,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
         };
 
         const onError = (event: Event) => {
-            console.log("onError", event);
+            // console.log("onError", event);
             setStatus(SocketStatus.ERROR);
         };
         socket.addEventListener("open", onOpen);

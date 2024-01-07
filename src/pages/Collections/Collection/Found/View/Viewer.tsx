@@ -63,11 +63,12 @@ export default function Viewer({
             }}
         >
             <Markdown
+                
                 components={{
                     a: UseLink,
                     img: UseImage,
                 }}
-                className={"markdown"}
+                className={"markdown overflow-scroll"}
             >
                 {processCustomLinks(state.text)}
             </Markdown>

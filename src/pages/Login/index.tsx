@@ -71,14 +71,15 @@ function LoginForm() {
         }
     }, [disabled, status]);
     useEffect(() => {
-        const defaultRoute = currentLocation.state?.from ?? "/collections"
         if (status === SocketStatus.CONNECTED) {
-            navigate(defaultRoute);
+            const defaultRoute = currentLocation.state?.from ?? "/collections";
+            navigate(defaultRoute, { replace: true });
         }
     }, [status, navigate, currentLocation]);
 
     function onToken(token: string, name: string) {
         dispatch(setUsername(name));
+
         connect(`${config.socketURL}?token=${token}`);
     }
 
@@ -109,7 +110,7 @@ function LoginForm() {
         }
     }
     useEffect(()=>{
-        if(tryCookie) {
+        if(tryCookie && status === SocketStatus.DISCONNECTED) {
             (async ()=>{
                 try{
                     const { name, token } = await loginThroughSession()
@@ -119,7 +120,7 @@ function LoginForm() {
                 }
             })()
         }
-    }, [tryCookie])
+    }, [tryCookie, status])
     if(tryCookie) {
         return (
             <Spinner />
@@ -147,15 +148,6 @@ function LoginForm() {
                 disabled={disabled}
             />
             <div className="flex justify-center items-center">
-                {/* <label className="inline-flex items-center">
-                    <input
-                        type="checkbox"
-                        className="form-checkbox h-5 w-5 text-blue-600"
-                        checked={remember}
-                        onChange={(e)=>setRemember(e.target.checked)}
-                    />
-                    <span className="ml-2 text-gray-600">{text("REMEMBER_ME")}</span>
-                </label> */}
                 <TermsList 
                     ref={termList}
                 />
