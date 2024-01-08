@@ -82,9 +82,26 @@ export default function SubHeader({
                             onChange={async(e) => {
                                 const file = e.target.files?.[0];
                                 setUploading(true);
-                                if (file === undefined) return;
+                                if (file === undefined) {
+                                    setUploading(false);
+                                    return;
+                                }
                                 // Instantly trigger the upload
                                 // of the form
+                                // If the file exceeds 10MB, instantly show error
+                                if(file.size > 10 * 1024 * 1024) {
+                                    showMessage({
+                                        message: text('FILE_TOO_LARGE'),
+                                        buttons: [
+                                            {
+                                                name: text('BUTTON_OK'),
+                                                callback: () => {},
+                                            }
+                                        ],
+                                    })
+                                    setUploading(false);
+                                    return;
+                                }
                                 const CSRRFToken = await fetchCSRFToken();
                                 const formData = new FormData(e.target.form as HTMLFormElement);
                                 const mimeType = file.type;
