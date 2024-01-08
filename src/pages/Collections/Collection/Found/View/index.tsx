@@ -63,9 +63,11 @@ export default function CollectionFound({
         const listener = (lastMessage: SocketMessage) => {
             if (lastMessage === null) return;
             // If my message and it was DOC.OPERATION.FORBIDDEN, then
+            // The same with NOT_FOUND
             // showcase an error box
             if (
-                lastMessage.type === "DOC.OPERATION.FORBIDDEN"
+                lastMessage.type === "DOC.OPERATION.FORBIDDEN" ||
+                lastMessage.type === "DOC.OPERATION.NOT_FOUND"
             ) {
                 showMessage({
                     message: text('OPERATION_FORBIDDEN'),
