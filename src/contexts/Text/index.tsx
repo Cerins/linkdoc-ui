@@ -35,7 +35,8 @@ type TextCode =
   | "READ_ONLY"
   | "WRITE"
   | "PRIVATE"
-  | "FILE_TOO_LARGE";
+  | "FILE_TOO_LARGE"
+  | 'OPERATION_FORBIDDEN';
 
 type Locale = "lv" | "en";
 
@@ -98,6 +99,7 @@ const dictionary: Record<Locale, Record<TextCode, string>> = {
         WRITE: "Rakstīt",
         PRIVATE: "Privāts",
         FILE_TOO_LARGE: "Fails nedrīkst būt lielāks 10MB",
+        OPERATION_FORBIDDEN: "Nebija iespējams veikt redīģēšanu. Saglabājiet izmaiņas ārpus redaktora un pārlādējiet lapu.",
     },
     en: {
         NAME_MIN: 'Name too short',
@@ -134,6 +136,7 @@ const dictionary: Record<Locale, Record<TextCode, string>> = {
         WRITE: "Write",
         PRIVATE: "Private",
         FILE_TOO_LARGE: "File must not be larger than 10MB",
+        OPERATION_FORBIDDEN: "Could not perform operation. Save changes outside of editor and reload page.",
     },
 };
 

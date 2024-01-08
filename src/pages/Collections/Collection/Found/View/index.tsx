@@ -6,6 +6,8 @@ import SubHeader from "../SubHeader";
 import Editor from "./Editor";
 import Viewer from "./Viewer";
 import useSocket, { SocketMessage } from "../../../../../contexts/Socket";
+import useModalContext from "../../../../../contexts/Modal";
+import useTextContext from "../../../../../contexts/Text";
 
 export default function CollectionFound({
     state,
@@ -18,6 +20,8 @@ export default function CollectionFound({
     const { emitter} = useSocket();
     const acknowledges = useRef(new Set<string>());
     const cmRef = useRef<CodeMirror.Editor | undefined>(undefined);
+    const { showMessage } = useModalContext();
+    const { text } = useTextContext();
     const showEditor = useMemo(
         () => (mode & Mode.EDITOR) === Mode.EDITOR && state.visibility === "write",
         [mode, state.visibility]
@@ -63,6 +67,21 @@ export default function CollectionFound({
                 lastMessage.acknowledge &&
         acknowledges.current.has(lastMessage.acknowledge)
             ) {
+                // If my message and it was DOC.OPERATION.FORBIDDEN, then
+                // showcase an error box
+                if (
+                    lastMessage.type === "DOC.OPERATION.FORBIDDEN"
+                ) {
+                    showMessage({
+                        message: text('OPERATION_FORBIDDEN'),
+                        buttons: [
+                            {
+                                name: text('BUTTON_OK'),
+                                callback: () => {},
+                            }
+                        ]
+                    });
+                }
                 acknowledges.current.delete(lastMessage.acknowledge);
                 // Return not needed only because own messages are broadcasted
                 // return;

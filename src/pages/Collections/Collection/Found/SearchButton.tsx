@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import useTextContext from "../../../../contexts/Text";
-import { ChangeEventHandler, MouseEventHandler, useEffect, useState } from "react";
+import { ChangeEventHandler, useEffect, useState } from "react";
 import collectionURL from "../../../../utils/collections/url";
 import { apply } from "../../../../utils/css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -21,7 +21,7 @@ export default function SearchButton() {
     const handleInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
         setName(e.target.value);
     };
-    const handleButtonClick: MouseEventHandler<HTMLButtonElement> = () => {
+    const handleNavigate = () => {
         navigate(collectionURL(colUUID!, name));
     };
 
@@ -40,6 +40,12 @@ export default function SearchButton() {
                 `}
         >
             <input
+                // if pressed enter then call handleNavigate
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                        handleNavigate();
+                    }
+                }}
                 disabled={isInputDisabled}
                 type="text"
                 value={name}
@@ -63,7 +69,7 @@ export default function SearchButton() {
             <button
                 disabled={isButtonDisabled}
                 type="button"
-                onClick={handleButtonClick}
+                onClick={handleNavigate}
                 className={`
                     flex-shrink-0
                     text-sm
