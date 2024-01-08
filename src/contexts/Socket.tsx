@@ -177,11 +177,11 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
     const ackCallbacks = useRef(new Map<string, SocketCb>());
 
     useEffect(() => {
-        const onOpen = (event: Event) => {
+        const onOpen = () => {
             // console.log("onOpen", event);
             setStatus(SocketStatus.CONNECTED);
         };
-        const onClose = (event: Event) => {
+        const onClose = () => {
             // console.log("onClose", event);
             setStatus(SocketStatus.DISCONNECTED);
         };
@@ -201,7 +201,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
             emitter.emit("message", newMsg);
         };
 
-        const onError = (event: Event) => {
+        const onError = () => {
             // console.log("onError", event);
             setStatus(SocketStatus.ERROR);
         };
