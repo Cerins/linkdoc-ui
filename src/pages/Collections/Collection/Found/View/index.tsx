@@ -62,26 +62,26 @@ export default function CollectionFound({
     useEffect(() => {
         const listener = (lastMessage: SocketMessage) => {
             if (lastMessage === null) return;
+            // If my message and it was DOC.OPERATION.FORBIDDEN, then
+            // showcase an error box
+            if (
+                lastMessage.type === "DOC.OPERATION.FORBIDDEN"
+            ) {
+                showMessage({
+                    message: text('OPERATION_FORBIDDEN'),
+                    buttons: [
+                        {
+                            name: text('BUTTON_OK'),
+                            callback: () => {},
+                        }
+                    ]
+                });
+            }
             const sid = lastMessage.payload.sid;
             if (
                 lastMessage.acknowledge &&
         acknowledges.current.has(lastMessage.acknowledge)
             ) {
-                // If my message and it was DOC.OPERATION.FORBIDDEN, then
-                // showcase an error box
-                if (
-                    lastMessage.type === "DOC.OPERATION.FORBIDDEN"
-                ) {
-                    showMessage({
-                        message: text('OPERATION_FORBIDDEN'),
-                        buttons: [
-                            {
-                                name: text('BUTTON_OK'),
-                                callback: () => {},
-                            }
-                        ]
-                    });
-                }
                 acknowledges.current.delete(lastMessage.acknowledge);
                 // Return not needed only because own messages are broadcasted
                 // return;
