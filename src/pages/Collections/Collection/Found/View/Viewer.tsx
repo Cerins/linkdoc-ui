@@ -23,6 +23,7 @@ export default function Viewer({
     const UseImage = ( { alt, src }: any) => {
         // If start with /file, then it's a file
         if(src.startsWith('/file')) {
+            // And then the source is our own API
             const fullUrl = `${config.apiURL}${src}`;
             return (
                 <img alt={alt} src={fullUrl} />

@@ -4,6 +4,7 @@ interface SpinnerProps {
   classNameInner?: string;
 }
 
+// Helper component to show a spinner
 const Spinner: React.FC<SpinnerProps> = ({
     className = "",
     classNameInner = "",

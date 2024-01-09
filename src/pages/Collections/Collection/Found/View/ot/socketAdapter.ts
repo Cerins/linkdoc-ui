@@ -11,6 +11,7 @@ type ICallbacks = undefined | Record<string,
 ) => void) | undefined>
 
 
+// This adapts our communication schema to allow to be used with the ot library
 export default class SocketAdapter
 
 {
@@ -34,6 +35,7 @@ export default class SocketAdapter
         this.emitter = manipulator.emitter;
         this.docName = meta.docName;
         this.colUUID = meta.colUUID;
+        // Listen on the socket for messages
         const listener = (lastMessage: SocketMessage)=>{
             if(lastMessage === null) return;
             const { type, payload } = lastMessage;
@@ -60,6 +62,7 @@ export default class SocketAdapter
         this.emitter.on('message', listener);
         this.listener = listener;
     }
+    // Send the desired transformation to the server
     sendOperation(revision: IRevision, operation: IOperation, selection: ISelection) {
         this.send(
             'DOC.OPERATION',
@@ -72,6 +75,7 @@ export default class SocketAdapter
             }
         )
     }
+    // Send the current selection to the server
     sendSelection(selection: ISelection) {
         this.send(
             'DOC.SELECTION',
@@ -82,15 +86,19 @@ export default class SocketAdapter
             }
         )
     }
+    // Register callbacks for the events
     registerCallbacks(callbacks: ICallbacks) {
         this.callbacks = callbacks;
     }
+    // Trigger the event
     trigger(event: IEvent, ...args: IData[]) {
         const action = this.callbacks && this.callbacks[event];
         if (action) {
             action.apply(this, args);
         }
     }
+    // Have to do cleanup since do not want the page to have a lot of listeners
+    // That are not in use
     cleanup() {
         if(this.listener) {
             this.emitter.removeListener('message', this.listener);

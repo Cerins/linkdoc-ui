@@ -28,6 +28,8 @@ export default function useModalContext() {
     return context;
 }
 
+// A component which shows a modal with a message and buttons
+// Also it possible to have multiple buttons
 export function ModalLike({
     children
 }: {
@@ -49,12 +51,16 @@ export const ModalProvider: React.FC<{ children: ReactNode }> = ({
     children,
 }) => {
     const [queue, setQueue] = useState<IMessage[]>([]);
+    // Keep the messages in the queue
+    // First in first out
     const [currentMessage, setCurrentMessage] = useState<IMessage | null>(null);
 
+    // Update the queue if the app wants to show a message
     const showMessage = useCallback((message: IMessage) => {
         setQueue((prev) => [...prev, message]);
     }, []);
 
+    // When a button is clicked, remove the message from the queue
     const handleClick = useCallback(() => {
         setQueue((prev) => {
             const updatedQueue = prev.slice(1);
@@ -63,6 +69,7 @@ export const ModalProvider: React.FC<{ children: ReactNode }> = ({
         });
     }, []);
 
+    // Update the current message if the queue is not empty
     React.useEffect(() => {
         if (queue.length > 0 && currentMessage === null) {
             setCurrentMessage(queue[0]);

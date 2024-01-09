@@ -28,11 +28,14 @@ const collectionsSlice = createSlice({
     name: "collections",
     initialState,
     reducers: {
+        // When the user has landed on the page
+        // Then loading happens
         landed(state, action: PayloadAction<string>) {
             state.status = "loading";
             state.acknowledge = action.payload;
             state.activeRequests++;
         },
+        // Check if the collection list was loaded
         onMessage(state, action: PayloadAction<SocketMessage | null>) {
             if(action.payload === null) return
             const { type, payload, acknowledge } = action.payload;
@@ -43,11 +46,13 @@ const collectionsSlice = createSlice({
                 state.activeRequests--;
             }
         },
+        // Create a new collection, the event started
         startCreateCollection(state) {
             state.activeRequests++;
             state.status = "loading"
             state.createActive = true
         },
+        // Successfully created a new collection
         endCreateCollection(state, action: PayloadAction<{
             uuid: string,
             name: string,
@@ -62,10 +67,13 @@ const collectionsSlice = createSlice({
             state.status = "loaded"
             state.activeRequests--;
         },
+        // Delete a collection, the event started
         startDeleteCollection(state) {
             state.status = "loading"
             state.activeRequests++;
         },
+        // Successfully deleted a collection
+        // Remove the collection from the list
         endDeleteCollection(state, action: PayloadAction<string | undefined>) {
             if(action.payload !== undefined) {
                 state.collections = state.collections.filter((col)=>col.uuid != action.payload)

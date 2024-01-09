@@ -32,6 +32,8 @@ export default function Editor({
     const { send, emitter } = useSocket();
     const { docName, uuid: colUUID } = useParams();
     useEffect(()=>{
+        // Transform the textarea into a code mirror instance
+        // And connect it to the server
         const cm = CodeMirror.fromTextArea(document.getElementById('note') as HTMLTextAreaElement, {
             lineNumbers: true,
         })

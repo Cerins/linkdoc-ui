@@ -12,6 +12,7 @@ export interface CollectionState {
   visibility: "read" | "write";
 }
 
+// Init the document based on the response from the server
 export function initDocument(document: {
     text: string,
     visibility: "read" | "write",
@@ -25,6 +26,7 @@ export function initDocument(document: {
     } as const;
 }
 
+// Set the text of the document to the given text
 export function setText(text: string) {
     return {
         type: "SET_TEXT",
@@ -34,6 +36,7 @@ export function setText(text: string) {
     } as const;
 }
 
+// Set the status of the document to the given status
 export function failedLoad(code: "system error") {
     return {
         type: "FAILED_LOAD",
@@ -43,6 +46,7 @@ export function failedLoad(code: "system error") {
     } as const;
 }
 
+// Allow to simply override the state of the collection
 export function setState(state: CollectionState) {
     return {
         type: "SET_STATE",
@@ -68,6 +72,7 @@ export type Transform =
       };
     };
 
+// Custom text transformation
 export function transformText(transform: Transform, self = false) {
     return {
         type: "TRANSFORM_TEXT",
@@ -78,6 +83,7 @@ export function transformText(transform: Transform, self = false) {
     } as const;
 }
 
+// Set the cursor position
 export function setCursor(cursor: number) {
     return {
         type: "SET_CURSOR",
@@ -85,6 +91,7 @@ export function setCursor(cursor: number) {
     } as const;
 }
 
+// The the sid of the document
 export function setSid(sid: number) {
     return {
         type: "SET_SID",
@@ -101,6 +108,14 @@ export type CollectionAction =
   | ReturnType<typeof setCursor>
   | ReturnType<typeof setSid>;
 
+/**
+ * Reducer function for managing the state of a collection.
+ *
+ * @param state - The current state of the collection.
+ * @param action - The action object that describes the state change.
+ * @returns The new state of the collection.
+ * @throws Error if the action type is unknown.
+ */
 export default function collectionReducer(
     state: CollectionState,
     action: CollectionAction
@@ -115,6 +130,9 @@ export default function collectionReducer(
             sid: action.payload.sid,
         };
     }
+    // Currently deprecated
+    // The sate does not manage transformation anymore
+    // TODO remove this case
     case "TRANSFORM_TEXT": {
         let nText = state.text;
         let nCursor = state.cursor;

@@ -5,7 +5,7 @@ export default function CollectionFresh() {
     {
     /* TODO Fancier loading animation */
     }
-
+    // This is to show something while the collection is loading
     return (
         <div className="h-screen">
             <Layout header={<Header />}>

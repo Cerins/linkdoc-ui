@@ -5,6 +5,7 @@ type Term = Record<Locale, {
 }>
 
 
+// Keep the terms in the TS file
 export default [
     {
         'lv': {

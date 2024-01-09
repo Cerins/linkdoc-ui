@@ -140,11 +140,14 @@ const dictionary: Record<Locale, Record<TextCode, string>> = {
     },
 };
 
+// Save the locale to local storage
+// So that user preference is saved
 function localeFromLocalStorage(): Locale {
     const potentialMatch = window.localStorage.getItem('locale')
     return (potentialMatch ?? 'lv') as Locale
 }
 
+// Save the locale to local storage
 function localeToLocalStorage(locale: Locale) {
     window.localStorage.setItem('locale', locale)
 }
@@ -157,6 +160,8 @@ function TextProvider({ children }: { children: React.JSX.Element }) {
         setLocaleState(locale);
     }
     function text(code: TextCode) {
+        // If not code found then return the code itself with __ on both sides
+        // This should be impossible because of the type system
         return dictionary[locale][code] ?? `__${code}__`;
     }
 

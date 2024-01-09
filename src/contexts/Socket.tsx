@@ -170,10 +170,18 @@ function useSocket() {
 
 type SocketCb = (err: null | Error, data: SocketMessage) => void;
 
+// A component which allows its descendants to use the socket
+// Since i am using a Memo with a single component, then the socket will be a singleton
+// Every component uses the same connection
 function SocketProvider({ children }: { children: React.ReactNode }) {
     const socket = useMemo(() => Socket.getInstance(), []);
     const [status, setStatus] = useState<SocketStatus>(SocketStatus.DISCONNECTED);
+    // Allow an api that allows to listen to custom events
+    // This is done, because state is not enough to store messages
+    // Since the state is buffered and sometimes messages could be lost
     const emitter = useMemo(() => new EventEmitter(), []);
+    // Allow to execute a callback if receive a message with an acknowledge
+    // That matches the acknowledge of the message sent
     const ackCallbacks = useRef(new Map<string, SocketCb>());
 
     useEffect(() => {
@@ -197,6 +205,7 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
             const { acknowledge } = newMsg;
             if (acknowledge) {
                 const cb = ackCallbacks.current.get(acknowledge);
+                // If there is a callback, then execute it
                 if (cb) {
                     ackCallbacks.current.delete(acknowledge);
                     cb(null, newMsg);
@@ -232,9 +241,11 @@ function SocketProvider({ children }: { children: React.ReactNode }) {
                 socket.disconnect();
                 setStatus(SocketStatus.DISCONNECTED);
             },
+            // Send messages without a callback
             send: (type: string, payload: unknown, acknowledge?: string) => {
                 socket.send(type, payload, acknowledge);
             },
+            // Send a message with a callback
             sendCb: (type: string, payload: unknown, cb: SocketCb) => {
                 const acknowledge = luid();
                 ackCallbacks.current.set(acknowledge, cb);

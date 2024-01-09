@@ -57,6 +57,7 @@ function DeleteButton({
     const username = useSelector((root: IState) => root.login.username);
     const acknowledge = useRef<string>("");
     const dispatch = useDispatch();
+    // Have to confirm the delete
     const confirmedDelete = () => {
         setDisabled(true);
         acknowledge.current = luid(username);
@@ -70,6 +71,8 @@ function DeleteButton({
         );
     };
     useEffect(() => {
+        // Listen if there was a response
+        // TODO use the sendCb
         const listener = (lastMessage: SocketMessage) => {
             if (lastMessage === null) return;
             const { acknowledge: cAck, type } = lastMessage;
@@ -96,6 +99,9 @@ function DeleteButton({
             emitter.removeListener('message', listener);
         }
     }, []);
+    // If the user clicks to delete
+    // Then show a confirmation message
+    // Do not allow to delete without confirmation
     const handleDelete = () => {
         showMessage({
             message: text("DELETE_CONFIRM"),
@@ -112,6 +118,7 @@ function DeleteButton({
         });
     };
 
+    // Only show the delete button if the user is the owner
     return (
         <button
             onClick={handleDelete}
@@ -144,7 +151,10 @@ function DeleteButton({
 function ListItem({ collection: col }: { collection: Collection }) {
     const [disabled, setDisabled] = useState(false);
     const { locale } = useTextContext();
+    // This calculate the link to the collection
+    // Either use the default document or the current date
     const to = useMemo(()=> `/collections/${col.uuid}/${col.defaultDocument ?? standardDate(new Date())}`, [col.uuid])
+    // Have to make everything a link since contents ignores on click
     return (
         <div key={col.uuid} className="group contents">
             <Link
@@ -177,6 +187,7 @@ function ListItem({ collection: col }: { collection: Collection }) {
 }
 
 function ListBody({ collections }: { collections: Collection[] }) {
+    // Display the collections
     return (
         <>
             {collections.map((col) => (

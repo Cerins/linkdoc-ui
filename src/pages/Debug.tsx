@@ -4,6 +4,8 @@ import useTextContext from "../contexts/Text";
 import { Link } from "react-router-dom";
 import { Header, Layout } from "../components/Header";
 
+// A debug page to test the socket
+// NOT USED
 export default function Landing() {
     const { status, send, emitter } = useSocket();
     const { text } = useTextContext();

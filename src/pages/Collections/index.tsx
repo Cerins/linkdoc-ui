@@ -26,12 +26,14 @@ export default function Collections() {
     const dispatch = useDispatch();
 
     useEffect(() => {
+        // Try to get the collections
         const acknowledge = luid(username);
         send("COL.READ", {}, acknowledge);
         dispatch(landed(acknowledge));
     }, []);
 
     useEffect(() => {
+        // Acknowledge the message
         const listener = (lastMessage: SocketMessage) => {
             dispatch(onMessage(lastMessage));
         }
@@ -45,6 +47,7 @@ export default function Collections() {
         return <p>{text("LOADING")}</p>;
     }
 
+    // Display the collections and allow to create new ones
     return (
         <Layout
             header={

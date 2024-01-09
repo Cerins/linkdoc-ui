@@ -59,12 +59,14 @@ function LoginForm() {
     const [tryCookie, setTryCookie] = useState(true);
     // const [remember, setRemember] = useState(true);
     const remember = true;
+    // Get the route the user was trying to access
     const currentLocation = (useLocation() as { state?: {from?: To}});
     const { connect, status } = useSocket();
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const termList = useRef<TermsListHandles>(null);
     useEffect(() => {
+        // Display an error that the socket could not connect
         if (disabled && status === SocketStatus.ERROR) {
             setError("ERROR_GENERIC");
             setDisabled(false);
@@ -72,19 +74,23 @@ function LoginForm() {
     }, [disabled, status]);
     useEffect(() => {
         if (status === SocketStatus.CONNECTED) {
+            // On successful login, go to the default route
+            // or the route the user was trying to access
             const defaultRoute = currentLocation.state?.from ?? "/collections";
             navigate(defaultRoute, { replace: true });
         }
     }, [status, navigate, currentLocation]);
 
     function onToken(token: string, name: string) {
+        // JWT and name received, time to connect to the socket
         dispatch(setUsername(name));
-
         connect(`${config.socketURL}?token=${token}`);
     }
 
     async function onSubmit(e: FormEvent) {
         e.preventDefault();
+        // Ask the termList if the terms are accepted
+        // This will mutate the state of the termList
         const accepted = termList.current?.accepted() ?? false;
         if (!accepted) {
             setError("LOGIN_NOT_ACCEPTED");
@@ -110,6 +116,7 @@ function LoginForm() {
         }
     }
     useEffect(()=>{
+        // If landing a login page, try to login through the cookie
         if(tryCookie && status === SocketStatus.DISCONNECTED) {
             (async ()=>{
                 try{
@@ -147,12 +154,13 @@ function LoginForm() {
                 error={error || ""}
                 disabled={disabled}
             />
+            {/* The term list */}
             <div className="flex justify-center items-center">
                 <TermsList 
                     ref={termList}
                 />
             </div>
-
+            {/* The error message */}
             <p
                 className={`bg-rose-400 text-white rounded-2xl p-2 ${apply(
                     error,
@@ -162,7 +170,7 @@ function LoginForm() {
             >
                 {error ? text(error) : " "}
             </p>
-
+            {/* The login button */}
             <button
                 disabled={disabled}
                 type="submit"
@@ -175,6 +183,7 @@ function LoginForm() {
 }
 
 export default function Login() {
+    // Wrap the page in a layout
     return (
         <Layout header={<Header />}>
             <div className="flex h-full items-center justify-center">

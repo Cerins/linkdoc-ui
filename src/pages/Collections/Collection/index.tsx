@@ -15,6 +15,7 @@ import collectionReducer, { failedLoad, initDocument, initialState, setState } f
 import CollectionFound from "./Found/View";
 
 
+// The different states of the collection view
 export default function Collection() {
     const [state, dispatch] = useReducer(collectionReducer, initialState);
     const { emitter, send } = useSocket();
@@ -24,6 +25,8 @@ export default function Collection() {
     useEffect(() => {
         dispatch(setState(initialState));
         acknowledge.current = luid(username);
+        // On mount get the contents of the document
+        // the new sendCb would be a better usage
         send(
             "DOC.READ",
             {
@@ -35,27 +38,20 @@ export default function Collection() {
     }, [docName, colUUID]);
 
     useEffect(() => {
+        // Listen if the document was read
         const listener = (lastMessage: SocketMessage) => {
             if (lastMessage === null) return;
             const { type, payload, acknowledge: cAck } = lastMessage;
             if (acknowledge.current === cAck) {
                 if (type === "DOC.READ.OK") {
                     const { text, visibility, sid } = payload;
+                    // Depending on the visibility set the state in words - read or write
                     dispatch(initDocument({
                         text,
                         visibility: visibility === 2 ? "write" : "read",
                         sid,
                     }));
                 } else {
-                    // showMessage({
-                    //     message: text("ERROR_GENERIC"),
-                    //     buttons: [
-                    //         {
-                    //             name: text("BUTTON_OK"),
-                    //             callback: () => {},
-                    //         },
-                    //     ],
-                    // });
                     dispatch(failedLoad("system error"));
                 }
             }

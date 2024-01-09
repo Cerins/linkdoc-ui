@@ -8,11 +8,13 @@ export interface TermsListHandles {
 }
 
 const TermsList = forwardRef<TermsListHandles, unknown>((_, ref) => {
+    // By default no terms are accepted
     const [acceptedTerms, setAcceptedTerms] = useState<boolean[]>(
         terms.map(() => false)
     );
 
     const handleCheckboxChange = (index: number, isChecked: boolean) => {
+        // The the state to the fact that the checkbox was checked
         setAcceptedTerms((prev) => {
             const updated = [...prev];
             updated[index] = isChecked;
@@ -21,6 +23,7 @@ const TermsList = forwardRef<TermsListHandles, unknown>((_, ref) => {
     };
 
     useImperativeHandle(ref, () => ({
+        // Allow parent to check if all terms were accepted
         accepted: () => {
             return Object.values(acceptedTerms).every(value => value);
         },

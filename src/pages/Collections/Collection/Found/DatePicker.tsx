@@ -5,6 +5,7 @@ import { faCalendar } from "@fortawesome/free-solid-svg-icons";
 import Calendar from "react-calendar";
 import { apply } from "../../../../utils/css";
 
+// Allow to pick a date
 export default function DatePicker({
     date,
     setDate,

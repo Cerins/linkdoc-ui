@@ -84,6 +84,7 @@ export default function CollectionFound({
                 lastMessage.acknowledge &&
         acknowledges.current.has(lastMessage.acknowledge)
             ) {
+                // Do not store the acknowledge if was already acknowledged
                 acknowledges.current.delete(lastMessage.acknowledge);
                 // Return not needed only because own messages are broadcasted
                 // return;
@@ -92,9 +93,11 @@ export default function CollectionFound({
                 lastMessage.type === "DOC.WRITE.OK" ||
                 lastMessage.type === "DOC.ERASE.OK"
             ) {
+                // Take into account other users changes
                 const transform = lastMessage.payload.transform;
                 dispatch(transformText(transform));
             }
+            // Set the new document sid or in the library terms - revision
             if(sid !== undefined) {
                 dispatch(setSid(sid));
             }
@@ -122,6 +125,7 @@ export default function CollectionFound({
                     acknowledges={acknowledges}
                     display={showEditor}
                 />
+                {/* Allow to resize the editor */}
                 {showEditor && showRead && (
                     <div
                         className="resizer"

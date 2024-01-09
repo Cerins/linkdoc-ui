@@ -32,6 +32,7 @@ type PopupState = {
 } | null
 
 
+// The popup that allows to share a collection
 function Popup(
     {
         setOpen
@@ -46,6 +47,8 @@ function Popup(
     const activeUser = useSelector((state: IState) => state.login.username);
     
     useEffect(()=>{
+        // Get the information about the collection
+        // Which is the owner, the default document, the visibility and the users
         if(state === null){
             sendCb(
                 "COL.SHARE.INFO", 
@@ -69,7 +72,7 @@ function Popup(
                 })
         }
     }, [])
-
+    // The popup part which show the collection url and allows to copy it
     const ShareDoc = () => {
         if(state === null || state.status !== 'ok'){ 
             return <></>
@@ -97,17 +100,27 @@ function Popup(
             </div>
         )
     }
+    // The actual content of the popup
+    // All the cases
     const ModalInner = () => {
+        // If the state is null, then we are loading
         if(state === null){
             return <Spinner />
         }
+        // IF error happened then show the error
         if(state.status === "error"){
             return <p>{text('ERROR_GENERIC')}</p>
         }
+        // Otherwise more branching
+        // status ok is needed for typescript
+        // there is no other possible status here
         if(state.status === "ok"){
+
+            // If not the owner then only allow to see the URL and copy it
             if(state.owner === false) {
                 return <ShareDoc />
             }
+            // The option to change the general visibility of the collection
             const ChangeVisibility = () => {
                 return (
                     <div className="border w-full">
@@ -119,6 +132,9 @@ function Popup(
                                     ...prevState,
                                     visibility: selectedVisibility
                                 } as any));
+                                // Use optimistic update
+                                // First update the local state
+                                // And only then complain if something went wrong
                                 sendCb(
                                     'COL.SHARE',
                                     {
@@ -151,6 +167,7 @@ function Popup(
                 )
             }
             const UserList = () => {
+                // Show all the users that have access to the collection
                 if(state.users === undefined) return <></>
                 if(state.users.filter((usr)=>usr.visibility > 0).length === 0) return <></>
                 return (
@@ -162,6 +179,11 @@ function Popup(
                                     state.users
                                         .filter((usr) => usr.visibility > 0)
                                         .map((user, index) => (
+                                            // Furthermore for each user allow them to be removed
+                                            // Use the optimistic update
+                                            // Visibility 0 means that the user does not have access
+                                            // Visibility 1 means that the user has read only access
+                                            // Visibility 2 means that the user has write access
                                             <li key={index} className="flex justify-between items-center">
                                                 <span>{user.name}</span>
                                                 {user.visibility === 1 && <FontAwesomeIcon icon={faEye} />}
@@ -204,9 +226,12 @@ function Popup(
                     </div>
                 )
             }
+            // The final part is to add a new user
             const AddUser = () => {
                 const [active, setActive] = useState(true);
                 const [username, setUsername] = useState("");
+                // By default allow only read only access
+                // But that can be changed
                 const [permission, setPermission] = useState(1);
                 return (
                     <div className="mt-2">
@@ -247,12 +272,16 @@ function Popup(
                                     disabled={!active}
                                     onClick={()=>{
                                         setActive(false);
+                                        // Simply ignore if the user is trying to add themselves
                                         if(username === activeUser) {
                                             setPermission(1);
                                             setUsername("");
                                             setActive(true);
                                             return;
                                         }
+                                        // Use optimistic update
+                                        // And also do not complain if something went wrong
+                                        // Simply showcase that the user was not added
                                         sendCb(
                                             'COL.SHARE',
                                             {
@@ -308,6 +337,7 @@ function Popup(
                     </div>
                 )
             }
+            // The entire possibility of the popup for the owner
             return (
                 <div className="w-full">
                     <ChangeVisibility />
@@ -319,6 +349,7 @@ function Popup(
 
         }
     }
+    // And the modal itself
     return (
         <ModalLike>
             <div className="flex justify-end">
@@ -337,6 +368,7 @@ function Popup(
 export default function Share() {
     const { text } = useTextContext();
     const [open, setOpen] = useState(false);
+    // This allows to open the popup
     return (
         <>
             {open && <Popup setOpen={setOpen} />}

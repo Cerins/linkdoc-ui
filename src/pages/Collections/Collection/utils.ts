@@ -2,6 +2,8 @@
 //     return new Date().getTime();
 // }
 
+// Naive way to calculate the difference between two strings
+// In terms of the number of characters to delete and the string to insert
 export function difference(lstStr: string, nwStr: string) {
     // Use two pointers
     let l = 0;

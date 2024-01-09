@@ -6,6 +6,8 @@ import { apply } from "../../../../utils/css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 
+// This is the component that allows to search for a document
+// It's used in the header of the collection view
 export default function SearchButton() {
     const isInputDisabled = false;
     const isButtonDisabled = false;
@@ -21,6 +23,7 @@ export default function SearchButton() {
     const handleInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
         setName(e.target.value);
     };
+    // Navigate to the document with the given name
     const handleNavigate = () => {
         navigate(collectionURL(colUUID!, name));
     };

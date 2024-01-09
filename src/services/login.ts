@@ -1,5 +1,6 @@
 import config from "./config";
 
+// Get the CSRF token from the server
 async function fetchCSRFToken() {
     const url = new URL('/auth/csrf', config.apiURL);
     const res = await fetch(url.toString(), {
@@ -13,6 +14,7 @@ async function fetchCSRFToken() {
     return token as string;
 }
 
+// Get the login JWT token from the server
 async function getLoginToken(
     username: string,
     password: string,
@@ -42,6 +44,8 @@ async function getLoginToken(
     return token as string;
 }
 
+
+// Allow to get the JWT token from the session cookie
 
 async function loginThroughSession() {
     const csrfToken = await fetchCSRFToken();

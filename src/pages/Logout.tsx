@@ -3,6 +3,7 @@ import { Header, Layout } from "../components/Header";
 import { logout } from "../services/login";
 import Spinner from "../components/Spinner";
 
+// Simply try to logout and reset the state
 export default function Logout() {
     useEffect(() => {
         // TODO further cleans, such as cookie deletion

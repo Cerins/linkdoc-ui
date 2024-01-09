@@ -61,6 +61,8 @@ export function CollectionCreate({
 
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
+        // Allow to submit a new collection, then wait for the response
+        // TODO: use the sendCb
         if (!error) {
             acknowledge.current = luid(username);
             dispatch(startCreateCollection());
@@ -75,6 +77,7 @@ export function CollectionCreate({
     };
 
     useEffect(() => {
+        // Listen on the socket for the response
         const listener = (lastMessage: SocketMessage) => {
             if (lastMessage === null) return;
             const { type, payload, acknowledge: incoming } = lastMessage;
@@ -114,7 +117,8 @@ export function CollectionCreate({
 
     const isInputDisabled = createActive;
     const isButtonDisabled = createActive || Boolean(error);
-
+    // Allow to create a new collection
+    // With the given name
     return (
         <form onSubmit={handleSubmit} className="w-full max-w-xs">
             <div

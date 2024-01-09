@@ -43,6 +43,8 @@ export default function SubHeader({
         const stDate = standardDate(date);
         navigator(collectionURL(colUUID!, stDate));
     }
+    // Allow to toggle between editor and read mode
+    // or both
     function onToggleClick() {
         setMode((mode) => (mode % Mode.BOTH) + 1);
     }
@@ -58,12 +60,11 @@ export default function SubHeader({
                 <div className="flex items-center grow">
                     <SearchButton />
                     <DatePicker date={null} setDate={onDatePick} />
+                    {/* The component which allows to upload a file */}
                     <form
                         style={{
                             display: showEditor ? "block" : "none",
                         }}
-                        // method="POST"
-                        // encType="multipart/form-data"
                         onSubmit={(e) => {
                             e.preventDefault();
                         }}
@@ -89,6 +90,7 @@ export default function SubHeader({
                                 // Instantly trigger the upload
                                 // of the form
                                 // If the file exceeds 10MB, instantly show error
+                                // TODO: Remove hard coded value
                                 if(file.size > 10 * 1024 * 1024) {
                                     showMessage({
                                         message: text('FILE_TOO_LARGE'),
@@ -105,15 +107,12 @@ export default function SubHeader({
                                 const CSRRFToken = await fetchCSRFToken();
                                 const formData = new FormData(e.target.form as HTMLFormElement);
                                 const mimeType = file.type;
-                                // const file = formData.get("file") as File;
-                                // const colUUID = formData.get("colUUID") as string;
+                                // Simply send the file to the server
                                 const xhr = new XMLHttpRequest();
                                 xhr.open("POST", `${config.apiURL}/file`);
                                 // Add cookies
                                 xhr.withCredentials = true;
-                                // Set the proper urlencoded content type
-                                // Set url extended
-                                // xhr.setRequestHeader("Content-Type", "form-data");
+                                // Have to send the token to prevent CSRF
                                 xhr.setRequestHeader("CSRF-Token", CSRRFToken);
                                 xhr.send(formData);
                                 xhr.onload = () => {
@@ -128,6 +127,7 @@ export default function SubHeader({
                                             "image/gif",
                                             "image/webp",
                                         ];
+                                        // Add image pointer to the document in alternative text format
                                         if(imgMimeType.includes(mimeType)) {
                                         // Insert image
                                             const img = `\n![${file.name}](/file/${uuid})`;
@@ -136,6 +136,7 @@ export default function SubHeader({
                                             // Also scroll to the end of the document
                                             cmRef.current?.scrollIntoView({line: cmRef.current?.lastLine()! + 1, ch: 0})
                                         }
+                                        // Insert a link to the file
                                         else {
                                         // Insert link
                                             const link = `\n[${file.name}](/file/${uuid})`;
@@ -145,6 +146,8 @@ export default function SubHeader({
                                             cmRef.current?.scrollIntoView({line: cmRef.current?.lastLine()! + 1, ch: 0})
 
                                         }
+                                    // Display if the file is too large
+                                    // Should not happen if the client respects the limit
                                     } else if(code === 413) {
                                         showMessage({
                                             message: text('FILE_TOO_LARGE'),
@@ -181,6 +184,7 @@ export default function SubHeader({
                                     })
                                 }
                                 // Xhr finally
+                                // So not matter what happens upload is finished
                                 xhr.onloadend = () => {
                                     setUploading(false);
                                 };

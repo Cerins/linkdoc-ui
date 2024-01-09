@@ -11,6 +11,7 @@ function FlagSelect({
   currentLocale: Locale;
   onSelect: (locale: Locale) => void;
 }) {
+    // Language dropdown
     const [showDropdown, setShowDropdown] = useState(false);
     const flagRef = useRef<HTMLImageElement>(null);
 
@@ -22,6 +23,7 @@ function FlagSelect({
                 src={`/flags/${currentLocale}.svg`}
                 onClick={() => setShowDropdown(!showDropdown)}
             />
+            {/* If dropdown the show an absolute div with other language options */}
             {showDropdown && (
                 <div
                     className="absolute right-0 shadow-lg bg-white"
@@ -37,6 +39,7 @@ function FlagSelect({
                                     setShowDropdown(false);
                                 }}
                             >
+                                {/* Flags are stored in public folder */}
                                 <img
                                     className="h-5 inline mx-auto"
                                     src={`/flags/${locale}.svg`}
@@ -56,6 +59,10 @@ interface HeaderTemplateProps {
   rightItems?: ReactNode;
 }
 
+/**
+ * Component which allows to visit login/logout page depending on the socket status
+ * 
+ */
 function SessionToggle() {
     const { text } = useTextService();
     const { status } = useSocket();
@@ -80,7 +87,9 @@ export const Header: React.FC<HeaderTemplateProps> = ({
                 <Logo className="h-9" />
                 {leftItems}
             </div>
+
             <div className="flex justify-end items-center space-x-3">
+                {/* Change locale if the flag in the dropdown was clicked */}
                 <FlagSelect currentLocale={locale} onSelect={setLocale} />
                 {rightItems}
                 <SessionToggle />

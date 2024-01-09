@@ -18,13 +18,13 @@ const loginSlice = createSlice({
     name: "login",
     initialState,
     reducers: {
+        // Allow to set the username
+        // Used to see which collections are owned by the user
         setUsername: (state, action: PayloadAction<string>) => {
             state.username = action.payload;
         },
     },
 });
-
-// This would be an example how it can be used with async operations. Pretty cool, isn't it?
 
 export const { setUsername } = loginSlice.actions;
 
